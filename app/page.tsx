@@ -782,9 +782,92 @@ export default function ListingLiftAI() {
       <BackgroundPattern />
 
       <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Header with logout */}
-        <div className="text-center mb-8">
-          <div className="inline-block p-6 bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border-4 border-orange-500 transform rotate-1 hover:rotate-0 transition-transform duration-300 relative">
+        {/* Expanded Header Card */}
+        <div className="w-full mb-8">
+          <div className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-3xl shadow-2xl border-4 border-orange-500 p-8 flex flex-col xl:flex-row gap-8 items-stretch relative">
+            {/* Left Column: Branding & Quick Actions (1/3) */}
+            <div className="flex flex-col justify-between xl:w-1/3 w-full">
+              <div>
+                <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-100 to-yellow-200 mb-2 tracking-tight">
+                  ListingLift<span className="text-orange-200">.ai</span>
+                </h1>
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-5 h-5 text-orange-100" />
+                  <span className="text-xl font-bold text-white drop-shadow">Amazon Listing Optimizer</span>
+                  <Fire className="w-5 h-5 text-red-200" />
+                </div>
+                <p className="text-md text-orange-50 max-w-2xl font-medium mb-2">
+                  Turn your boring listings into conversion machines with AI that actually gets it 🚀
+                </p>
+                {user && (
+                  <p className="text-xs text-orange-100 mt-2">Welcome back, {user.email}! 👋</p>
+                )}
+              </div>
+              <div className="mt-6 border-t border-orange-200 pt-4">
+                <h2 className="text-lg font-black text-orange-100 mb-2">Quick Actions ⚡</h2>
+                <div className="flex flex-wrap gap-3 mb-4">
+                  {activeTab === "input" && (
+                    <>
+                      <Button
+                        className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl border-2 border-blue-400 text-sm"
+                        onClick={handleLoadSampleData}
+                      >
+                        <Target className="w-4 h-4 mr-2" />
+                        Load Sample Data
+                      </Button>
+                      <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold rounded-xl border-2 border-green-400 text-sm">
+                        <Rocket className="w-4 h-4 mr-2" />
+                        Quick Start Guide
+                      </Button>
+                    </>
+                  )}
+                  {activeTab === "optimize" && (
+                    <>
+                      <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold rounded-xl border-2 border-yellow-400 text-sm">
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Apply All Suggestions
+                      </Button>
+                      <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl border-2 border-purple-400 text-sm">
+                        <Star className="w-4 h-4 mr-2" />
+                        Save Progress
+                      </Button>
+                    </>
+                  )}
+                  {activeTab === "preview" && (
+                    <>
+                      <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold rounded-xl border-2 border-green-400 text-sm">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Export Listing
+                      </Button>
+                      <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl border-2 border-blue-400 text-sm">
+                        <TrendingUp className="w-4 h-4 mr-2" />
+                        Performance Score
+                      </Button>
+                    </>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl border-2 border-gray-500 text-sm">
+                    💾 Save Optimization
+                  </Button>
+                  <Button className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl border-2 border-gray-500 text-sm">
+                    📂 Load Previous
+                  </Button>
+                </div>
+              </div>
+            </div>
+            {/* Right Column: Keywords Section (2/3) */}
+            <div className="flex flex-col justify-between bg-white rounded-2xl p-6 border-2 border-orange-200 xl:w-2/3 w-full mt-8 xl:mt-0">
+              <h2 className="text-xl font-black text-orange-500 mb-4 flex items-center gap-2">
+                <BarChart3 className="w-6 h-6 text-orange-400" />
+                Keywords
+              </h2>
+              <div className="flex-1 flex items-center justify-center text-gray-400 italic text-sm">
+                {/* Placeholder for future keyword content */}
+                (Keyword tools coming soon)
+              </div>
+            </div>
+            {/* Logout button, absolutely positioned */}
             <Button
               onClick={handleLogout}
               className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white p-2 rounded-xl"
@@ -792,86 +875,6 @@ export default function ListingLiftAI() {
             >
               <LogOut className="w-4 h-4" />
             </Button>
-
-            {/* Main branding section */}
-            <div className="mb-6">
-              <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 mb-2 tracking-tight">
-                ListingLift<span className="text-orange-600">.ai</span>
-              </h1>
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Sparkles className="w-5 h-5 text-orange-500" />
-                <p className="text-xl font-bold text-gray-800">Amazon Listing Optimizer</p>
-                <Fire className="w-5 h-5 text-red-500" />
-              </div>
-              <p className="text-sm text-gray-700 max-w-2xl mx-auto font-medium">
-                Turn your boring listings into conversion machines with AI that actually gets it 🚀
-              </p>
-              {user && <p className="text-xs text-gray-600 mt-2">Welcome back, {user.email}! 👋</p>}
-            </div>
-
-            {/* Tab-specific functionality */}
-            <div className="border-t-2 border-gray-200 pt-4">
-              <div className="text-center mb-4">
-                <h2 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
-                  Quick Actions ⚡
-                </h2>
-              </div>
-
-              <div className="flex flex-wrap justify-center gap-3 mb-4">
-                {/* Tab-specific buttons */}
-                {activeTab === "input" && (
-                  <>
-                    <Button
-                      className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl border-2 border-blue-400 text-sm"
-                      onClick={handleLoadSampleData}
-                    >
-                      <Target className="w-4 h-4 mr-2" />
-                      Load Sample Data
-                    </Button>
-                    <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold rounded-xl border-2 border-green-400 text-sm">
-                      <Rocket className="w-4 h-4 mr-2" />
-                      Quick Start Guide
-                    </Button>
-                  </>
-                )}
-
-                {activeTab === "optimize" && (
-                  <>
-                    <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold rounded-xl border-2 border-yellow-400 text-sm">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Apply All Suggestions
-                    </Button>
-                    <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl border-2 border-purple-400 text-sm">
-                      <Star className="w-4 h-4 mr-2" />
-                      Save Progress
-                    </Button>
-                  </>
-                )}
-
-                {activeTab === "preview" && (
-                  <>
-                    <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold rounded-xl border-2 border-green-400 text-sm">
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Export Listing
-                    </Button>
-                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl border-2 border-blue-400 text-sm">
-                      <TrendingUp className="w-4 h-4 mr-2" />
-                      Performance Score
-                    </Button>
-                  </>
-                )}
-              </div>
-
-              {/* Universal save/load buttons */}
-              <div className="flex justify-center gap-2">
-                <Button className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl border-2 border-gray-500 text-sm">
-                  💾 Save Optimization
-                </Button>
-                <Button className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl border-2 border-gray-500 text-sm">
-                  📂 Load Previous
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
 
