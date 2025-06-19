@@ -31,6 +31,7 @@ import {
 import { supabase } from "@/lib/supabase"
 import type { User } from "@supabase/supabase-js"
 import { scrapeDecodo } from "../lib/decodo"
+import OptimizeNav from "../components/ui/OptimizeNav"
 
 interface ListingData {
   asin: string
@@ -1097,6 +1098,8 @@ export default function ListingLiftAI() {
               Preview
             </TabsTrigger>
           </TabsList>
+          {/* Show OptimizeNav only when Optimize tab is active */}
+          {activeTab === "optimize" && <OptimizeNav />}
 
           <TabsContent value="input" className="space-y-6">
             <Card className="bg-white/95 backdrop-blur-sm border-4 border-orange-400 shadow-2xl rounded-3xl overflow-hidden">
@@ -1144,7 +1147,15 @@ export default function ListingLiftAI() {
                   </div>
                 </div>
 
-                <div className="text-center pt-4">
+                <div className="flex flex-col md:flex-row items-center justify-center gap-4 pt-4">
+                  <Button
+                    className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl border-2 border-blue-400 text-md md:text-lg px-6 py-4 md:px-8 md:py-6"
+                    onClick={handleLoadSampleData}
+                    type="button"
+                  >
+                    <Target className="w-5 h-5 mr-2" />
+                    Load Sample Data
+                  </Button>
                   <Button
                     onClick={() => {
                       console.log("[UI] Generate AI Magic button clicked", { asin: listingData.asin, heroKeyword: listingData.heroKeyword })
