@@ -26,6 +26,8 @@ async function saveProductToSupabase(product: any): Promise<any> {
     title: product.title,
     reviews_count: product.reviews_count,
     rating: product.rating,
+    bullet_points: product.bullet_points,
+    description: product.description,
     created_at: product.created_at || new Date().toISOString(),
   })
   if (error) throw error
@@ -49,6 +51,8 @@ async function saveSearchResultsToSupabase(heroKeyword: string, organicResults: 
     title: item.title,
     reviews_count: item.reviews_count,
     rating: item.rating,
+    bullet_points: item.bullet_points,
+    description: item.description,
     position: item.pos || idx + 1,
     created_at: new Date().toISOString(),
   }))
@@ -96,11 +100,14 @@ export async function scrapeDecodo(params: Record<string, any>): Promise<any> {
 
   // Save to Supabase according to schema
   if (params.target === "amazon_product" && data.results) {
+    const result = data.results[0].content.results
     var product = {
-      asin: data.results[0].content.results.asin,
-      title: data.results[0].content.results.title,
-      reviews_count: data.results[0].content.results.reviews_count,
-      rating: data.results[0].content.results.rating,
+      asin: result.asin,
+      title: result.title,
+      reviews_count: result.reviews_count,
+      rating: result.rating,
+      bullet_points: result.bullet_points,
+      description: result.description,
       created_at: new Date().toISOString(),
     }
     await saveProductToSupabase(product)
@@ -109,7 +116,13 @@ export async function scrapeDecodo(params: Record<string, any>): Promise<any> {
   if (params.target === "amazon_search" && data.results[0].content.results.results.organic) {
     // Filter organic results with less than 50 reviews before saving
     const organicResults = data.results[0].content.results.results.organic
-    const filteredOrganicResults = organicResults.filter((item: any) => (item.reviews_count ?? 0) >= 50)
+    // Map bullet_points and description if present
+    const mappedOrganicResults = organicResults.map((item: any) => ({
+      ...item,
+      bullet_points: item.bullet_points,
+      description: item.description,
+    }))
+    const filteredOrganicResults = mappedOrganicResults.filter((item: any) => (item.reviews_count ?? 0) >= 50)
     console.log("[Decodo] Saving filtered search results to Supabase", filteredOrganicResults)
     await saveSearchResultsToSupabase(
       data.results[0].content.results.query || params.query,

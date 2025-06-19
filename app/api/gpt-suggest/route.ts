@@ -143,10 +143,90 @@ async function POST_keyword_gap(req: NextRequest) {
 }
 
 /**
+ * Bullet Point Keyword Gap Analysis API route.
+ * Accepts POST requests with { currentBullets: string[], competitorBullets: string[][] }.
+ * Calls OpenAI GPT-4o to extract meaningful keywords from competitor bullet points, compare with ours, and identify gaps.
+ * Returns a JSON object:
+ *   {
+ *     missing_keywords: [...],
+ *     our_existing_keywords: [...],
+ *     high_value_gaps: [...]
+ *   }
+ */
+async function POST_bullet_gap(req: NextRequest) {
+  try {
+    const { currentBullets, competitorBullets } = await req.json()
+    if (!Array.isArray(currentBullets) || !Array.isArray(competitorBullets)) {
+      return NextResponse.json({ error: "Missing currentBullets or competitorBullets" }, { status: 400 })
+    }
+    const prompt = `You are a keyword gap analysis expert. Extract meaningful keywords from competitor bullet points and identify what our bullet points are missing.\nInput Data:\n\nOur Bullet Points:\n${currentBullets.map((b: string, i: number) => `${i + 1}. ${b}`).join("\n")}\nCompetitor Bullet Points:\n${competitorBullets.map((arr: string[], idx: number) => `Competitor ${idx + 1}:\n${arr.map((b: string, i: number) => `${i + 1}. ${b}`).join("\n")}`).join("\n\n")}\n\nStep 1: Extract meaningful keywords from all competitor bullet points using these criteria (same as for titles, but applied to bullet points).\nStep 2: Compare against our bullet points and identify gaps.\nOutput Format (JSON):\njson{\n  \"missing_keywords\": [\n    {\n      \"keyword\": \"premium\",\n      \"frequency\": 3,\n      \"competitors_using\": [\"Competitor 1\", \"Competitor 2\"],\n      \"category\": \"quality_indicator\",\n      \"priority\": \"high\"\n    }\n  ],\n  \"our_existing_keywords\": [\n    ...\n  ],\n  \"high_value_gaps\": [\n    ...\n  ]\n}\nPrioritization: Mark as high priority if keyword appears in 2+ competitors and represents searchable product attributes or customer needs.\nRespond ONLY with the JSON object, no extra commentary.`
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3,
+    })
+    const content = completion.choices[0].message.content?.trim() || "{}"
+    let result = {}
+    try {
+      let cleanContent = content
+        .replace(/^```json\s*/i, "")
+        .replace(/^```/, "")
+        .replace(/```$/, "")
+        .trim()
+      result = JSON.parse(cleanContent)
+    } catch {
+      return NextResponse.json({ error: "Failed to parse GPT response" }, { status: 500 })
+    }
+    return NextResponse.json(result)
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
+/**
+ * Bullet Point Idea Generation API route.
+ * Accepts POST requests with { competitorBullets: string[] }.
+ * Calls OpenAI GPT-4o to generate 10 creative bullet point ideas based on competitor bullet points.
+ * Returns a JSON array of strings.
+ */
+async function POST_bullet_ideas(req: NextRequest) {
+  try {
+    const { competitorBullets } = await req.json()
+    if (!Array.isArray(competitorBullets)) {
+      return NextResponse.json({ error: "Missing competitorBullets" }, { status: 400 })
+    }
+    const prompt = `You are an expert Amazon listing copywriter. Given the bullet points from top competitors for a product, generate 10 creative, high-converting ideas for a single bullet point for our product. Each idea should be concise, persuasive, and highlight a unique benefit or feature, while leveraging the best elements from the competitor bullet points. Avoid direct copying—rephrase and improve upon what competitors are doing. Focus on clarity, customer appeal, and keyword inclusion. Make each 200-250 characters.\n\nCompetitor Bullet Points:\n${competitorBullets.map((b: string, i: number) => `${i + 1}. ${b}`).join("\n")}\n\nInstructions:\n- Each idea should be 1–2 sentences.\n- Use persuasive language and highlight unique selling points.\n- Incorporate relevant keywords where appropriate.\n- Do not repeat the same idea or phrasing.\n- Output as a JSON array of strings.\n\nExample Output:\n[\n  "Crafted from 100% organic matcha for a pure, vibrant flavor in every cup.",\n  "Stone-ground in Japan for a smooth, ceremonial-grade texture and taste.",\n  "Rich in antioxidants to support energy and focus throughout your day.",\n  "Perfect for lattes, smoothies, and baking—versatile for any recipe.",\n  "Resealable packaging keeps your matcha fresh and flavorful longer.",\n  "Sourced from first harvest leaves for maximum nutritional value.",\n  "Naturally gluten-free, vegan, and non-GMO for a clean, healthy choice.",\n  "Shade-grown and hand-picked for superior quality and color.",\n  "Tested for purity and safety, free from additives and preservatives.",\n  "Loved by baristas and home brewers alike for its exceptional taste."
+]\nRespond ONLY with the JSON array, no extra commentary.`
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    })
+    const content = completion.choices[0].message.content?.trim() || "[]"
+    let result: string[] = []
+    try {
+      let cleanContent = content
+        .replace(/^```json\s*/i, "")
+        .replace(/^```/, "")
+        .replace(/```$/, "")
+        .trim()
+      result = JSON.parse(cleanContent)
+    } catch {
+      return NextResponse.json({ error: "Failed to parse GPT response" }, { status: 500 })
+    }
+    return NextResponse.json(result)
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
+/**
  * Next.js API route handler for /api/gpt-suggest
  * Dispatches POST requests to either:
  *   - Title suggestion (default)
  *   - Keyword gap analysis (if x-ll-ai-action: 'keyword-gap' header is set)
+ *   - Bullet point gap analysis (if x-ll-ai-action: 'bullet-gap' header is set)
+ *   - Bullet point ideas (if x-ll-ai-action: 'bullet-ideas' header is set)
  */
 const handler = async (req: NextRequest) => {
   if (req.method !== 'POST') {
@@ -156,6 +236,14 @@ const handler = async (req: NextRequest) => {
   if (action === 'keyword-gap') {
     // @ts-ignore
     return POST_keyword_gap(req)
+  }
+  if (action === 'bullet-gap') {
+    // @ts-ignore
+    return POST_bullet_gap(req)
+  }
+  if (action === 'bullet-ideas') {
+    // @ts-ignore
+    return POST_bullet_ideas(req)
   }
   // Default: title suggestion
   return POST(req)

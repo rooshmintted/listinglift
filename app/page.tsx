@@ -173,6 +173,28 @@ export default function ListingLiftAI() {
   const [chosenTitleIdx, setChosenTitleIdx] = useState<number | null>(null)
   const [hasChosenTitleThisSession, setHasChosenTitleThisSession] = useState(false)
 
+  // Add new state for bullet points loading and error
+  const [bulletLoading, setBulletLoading] = useState(false)
+  const [bulletError, setBulletError] = useState("")
+  const [competitorDetails, setCompetitorDetails] = useState<any[]>([])
+
+  // Add new state for bullet point keyword gap analysis
+  const [bulletGapResult, setBulletGapResult] = useState<any>(null)
+  const [bulletGapLoading, setBulletGapLoading] = useState(false)
+  const [bulletGapError, setBulletGapError] = useState("")
+
+  // Add new state for bullet point ideas
+  const [bulletIdeas, setBulletIdeas] = useState<string[] | null>(null)
+  const [bulletIdeasLoading, setBulletIdeasLoading] = useState(false)
+  const [bulletIdeasError, setBulletIdeasError] = useState("")
+
+  const [lastCopiedIdeaIdx, setLastCopiedIdeaIdx] = useState<number | null>(null)
+  const [lastAcceptedIdeaIdx, setLastAcceptedIdeaIdx] = useState<number | null>(null)
+
+  const [bulletPointMode, setBulletPointMode] = useState(false)
+
+  const [chosenBulletIdxs, setChosenBulletIdxs] = useState<number[]>([])
+
   // When gptSuggestions changes, update visibleGptSuggestions
   useEffect(() => {
     setVisibleGptSuggestions(gptSuggestions)
@@ -1099,7 +1121,9 @@ export default function ListingLiftAI() {
             </TabsTrigger>
           </TabsList>
           {/* Show OptimizeNav only when Optimize tab is active */}
-          {activeTab === "optimize" && <OptimizeNav />}
+          {activeTab === "optimize" && (
+            <OptimizeNav selected={bulletPointMode ? "Bullet Points" : "Title"} />
+          )}
 
           <TabsContent value="input" className="space-y-6">
             <Card className="bg-white/95 backdrop-blur-sm border-4 border-orange-400 shadow-2xl rounded-3xl overflow-hidden">
@@ -1183,270 +1207,522 @@ export default function ListingLiftAI() {
           </TabsContent>
 
           <TabsContent value="optimize" className="space-y-6">
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              {/* Editable Content - Left Column */}
-              <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
-                  <CardTitle className="text-xl font-black">Your Current Title</CardTitle>
-                  <CardDescription className="text-green-100 font-medium">
-                    Time to make your listing absolutely iconic 💅
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="space-y-3">
-                    <Label className="text-sm font-black text-gray-800 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-green-500" />
-                      Current Title
-                    </Label>
-                    <div className={`bg-green-50 border-2 rounded-xl p-4 font-bold text-gray-800 mb-4 ${chosenTitleIdx === null ? 'border-green-500 ring-2 ring-green-400' : 'border-green-200'}`}
-                    >
-                      {titles[0] || listingData.title || <span className="italic text-gray-400">No title yet</span>}
+            {/* Debug message for bulletPointMode */}
+            <div className="text-xs text-gray-500 font-mono mb-2">[DEBUG] bulletPointMode: {String(bulletPointMode)}</div>
+            {!bulletPointMode ? (
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Editable Content - Left Column */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
+                    <CardTitle className="text-xl font-black">Your Current Title</CardTitle>
+                    <CardDescription className="text-green-100 font-medium">
+                      Time to make your listing absolutely iconic 💅
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-black text-gray-800 flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-green-500" />
+                        Current Title
+                      </Label>
+                      <div className={`bg-green-50 border-2 rounded-xl p-4 font-bold text-gray-800 mb-4 ${chosenTitleIdx === null ? 'border-green-500 ring-2 ring-green-400' : 'border-green-200'}`}
+                      >
+                        {titles[0] || listingData.title || <span className="italic text-gray-400">No title yet</span>}
+                      </div>
+                      <Label className="text-sm font-black text-gray-800 flex items-center gap-2 mt-6">
+                        <Sparkles className="w-4 h-4 text-green-500" />
+                        New Title Options
+                      </Label>
+                      {titles.length <= 1 && (
+                        <div className="italic text-gray-400 mb-2">No new title options yet. Add one or accept an AI suggestion!</div>
+                      )}
+                      {titles.slice(1).map((title, idx) => (
+                        <div key={idx + 1} className={`mb-4 border-2 rounded-xl p-2 ${chosenTitleIdx === idx + 1 ? 'border-green-500 ring-2 ring-green-400' : 'border-transparent'}`}>
+                          <Textarea
+                            rows={5}
+                            placeholder="Make it pop! Front-load your keyword and add some spice... 🌶️"
+                            value={title}
+                            onChange={e => updateTitle(idx + 1, e.target.value)}
+                            className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium w-full"
+                          />
+                          <div className="flex gap-2 mt-2 justify-end">
+                            <Button
+                              type="button"
+                              size="sm"
+                              className={`font-bold border-2 rounded-xl ${chosenTitleIdx === idx + 1 ? 'bg-green-500 text-white border-green-700' : 'border-green-400 text-green-700 bg-white hover:bg-green-50'}`}
+                              onClick={() => handleChooseTitle(idx + 1)}
+                            >
+                              ^ Choose Title
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="font-bold border-2 border-red-400 text-red-700 rounded-xl bg-white hover:bg-red-50"
+                              onClick={() => removeTitle(idx + 1)}
+                              aria-label="Delete title"
+                            >
+                              ^ Delete
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="flex gap-2 mt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={addTitle}
+                          aria-label="Add another title"
+                        >
+                          + Add Another Title
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="font-bold border-2 rounded-xl bg-blue-100 text-blue-700 border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={!hasChosenTitleThisSession || bulletLoading}
+                          onClick={async () => {
+                            setBulletLoading(true)
+                            setBulletError("")
+                            try {
+                              const res = await fetch("/api/bullet-points", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ asin: listingData.asin, heroKeyword: listingData.heroKeyword })
+                              })
+                              if (!res.ok) throw new Error(await res.text())
+                              const data = await res.json()
+                              setListingData(prev => ({
+                                ...prev,
+                                bulletPoints: (data.product?.bullet_points || "").split("\n").filter(Boolean),
+                                description: data.product?.description || ""
+                              }))
+                              setCompetitorDetails(data.competitors || [])
+                              // After setting competitor details, trigger bullet gap analysis
+                              const ourBullets = (data.product?.bullet_points || "").split("\n").filter(Boolean)
+                              const competitorBullets = (data.competitors || []).map((c: any) => (c.bullet_points || "").split("\n").filter(Boolean))
+                              setBulletGapLoading(true)
+                              setBulletGapError("")
+                              setBulletGapResult(null)
+                              fetch("/api/gpt-suggest", {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  "x-ll-ai-action": "bullet-gap"
+                                },
+                                body: JSON.stringify({ currentBullets: ourBullets, competitorBullets })
+                              })
+                                .then(async res => {
+                                  if (!res.ok) throw new Error(await res.text())
+                                  let text = await res.text()
+                                  let clean = text
+                                    .replace(/^```json\s*/i, "")
+                                    .replace(/^```/, "")
+                                    .replace(/```$/, "")
+                                    .trim()
+                                  try {
+                                    return JSON.parse(clean)
+                                  } catch {
+                                    throw new Error("Malformed bullet gap response")
+                                  }
+                                })
+                                .then(data => setBulletGapResult(data))
+                                .catch(err => setBulletGapError(err.message || "Failed to get bullet gap analysis."))
+                                .finally(() => setBulletGapLoading(false))
+                            } catch (err: any) {
+                              setBulletError(err.message || "Failed to fetch bullet points.")
+                            } finally {
+                              setBulletLoading(false)
+                            }
+                            console.debug('[DEBUG] About to set bulletPointMode to true')
+                            setBulletPointMode(true)
+                            console.debug('[DEBUG] bulletPointMode should now be true')
+                          }}
+                        >
+                          {bulletLoading ? "Loading..." : "Next Step: Optimize Bullet Points"}
+                        </Button>
+                      </div>
+                      {bulletError && <div className="text-xs text-red-600 font-bold mt-2">{bulletError}</div>}
                     </div>
-                    <Label className="text-sm font-black text-gray-800 flex items-center gap-2 mt-6">
-                      <Sparkles className="w-4 h-4 text-green-500" />
-                      New Title Options
-                    </Label>
-                    {titles.length <= 1 && (
-                      <div className="italic text-gray-400 mb-2">No new title options yet. Add one or accept an AI suggestion!</div>
+                  </CardContent>
+                </Card>
+
+                {/* AI Suggestions - Middle Column */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-yellow-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
+                    <CardTitle className="flex items-center gap-2 text-xl font-black">
+                      <Lightbulb className="w-6 h-6" />
+                      AI Suggestions 🤖
+                    </CardTitle>
+                    <CardDescription className="text-yellow-100 font-medium">
+                      Your personal conversion coach is here! 🚀
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-4">
+                    {/* Add GPT-4o Suggestion Button */}
+                    <div className="mb-4">
+                      <Button
+                        onClick={fetchGptSuggestion}
+                        disabled={gptLoading || !titles[0] || competitors.length === 0}
+                        className="w-full text-xs font-bold bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700 border-2 border-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
+                      >
+                        {gptLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                            Generating GPT-4o Suggestion...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Get GPT-4o Optimized Title
+                          </>
+                        )}
+                      </Button>
+                      {gptError && (
+                        <div className="text-xs text-red-600 font-bold mt-2">{gptError}</div>
+                      )}
+                    </div>
+                    {/* Show GPT-4o Suggestion Cards if available */}
+                    {visibleGptSuggestions && (
+                      <div className="grid grid-cols-1 gap-4">
+                        {visibleGptSuggestions.map((sugg, idx) => (
+                          <div
+                            key={idx}
+                            className="border-3 border-black rounded-2xl p-4 space-y-2 bg-gradient-to-br from-gray-50 to-gray-200 shadow-lg"
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge className="bg-black text-white text-xs font-black border-2 border-gray-900">GPT-4o</Badge>
+                              <span className="text-xs font-bold text-gray-700">{sugg.focus} Focus</span>
+                            </div>
+                            <div className="font-black text-md text-gray-900 mb-1">{sugg.title}</div>
+                            <div className="flex gap-2 text-xs font-bold">
+                              <span className="bg-green-100 text-green-700 rounded px-2 py-1">CTR: {sugg.ctr_increase}</span>
+                              <span className="bg-blue-100 text-blue-700 rounded px-2 py-1">CR: {sugg.cr_increase}</span>
+                              <span className="bg-yellow-100 text-yellow-700 rounded px-2 py-1">Priority: {sugg.priority}</span>
+                            </div>
+                            <div className="text-xs text-gray-700 font-medium mt-1">{sugg.justification}</div>
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                className="bg-green-500 hover:bg-green-600 text-white font-bold border-2 border-green-700 rounded-xl shadow"
+                                onClick={() => handleAcceptSuggestion(sugg.title)}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-400 text-red-700 font-bold rounded-xl shadow"
+                                onClick={() => handleRejectSuggestion(idx)}
+                              >
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
-                    {titles.slice(1).map((title, idx) => (
-                      <div key={idx + 1} className={`mb-4 border-2 rounded-xl p-2 ${chosenTitleIdx === idx + 1 ? 'border-green-500 ring-2 ring-green-400' : 'border-transparent'}`}>
-                        <Textarea
-                          rows={5}
-                          placeholder="Make it pop! Front-load your keyword and add some spice... 🌶️"
-                          value={title}
-                          onChange={e => updateTitle(idx + 1, e.target.value)}
-                          className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium w-full"
-                        />
-                        <div className="flex gap-2 mt-2 justify-end">
+                    {suggestions.length === 0 ? (
+                      <div className="text-center py-12">
+                        <div className="text-6xl mb-4">🤖</div>
+                        <p className="text-gray-500 font-medium">Generate suggestions to unlock the AI magic!</p>
+                      </div>
+                    ) : (
+                      suggestions.map((suggestion, index) => (
+                        <div
+                          key={index}
+                          className="border-3 border-yellow-200 rounded-2xl p-4 space-y-3 bg-gradient-to-br from-yellow-50 to-orange-50 hover:shadow-lg transition-all duration-300"
+                        >
+                          <div className="flex items-center justify-between">
+                            <Badge
+                              variant={
+                                suggestion.impact === "high"
+                                  ? "destructive"
+                                  : suggestion.impact === "medium"
+                                    ? "default"
+                                    : "secondary"
+                              }
+                              className={`text-xs font-black border-2 ${
+                                suggestion.impact === "high"
+                                  ? "bg-red-500 border-red-400"
+                                  : suggestion.impact === "medium"
+                                    ? "bg-orange-500 border-orange-400"
+                                    : "bg-gray-500 border-gray-400"
+                              }`}
+                            >
+                              {suggestion.impact === "high"
+                                ? "🔥 HIGH"
+                                : suggestion.impact === "medium"
+                                  ? "⚡ MED"
+                                  : "💡 LOW"}
+                            </Badge>
+                            <Badge
+                              variant="outline"
+                              className="text-xs font-bold border-2 border-yellow-400 text-yellow-600"
+                            >
+                              {suggestion.type === "title"
+                                ? "📝 TITLE"
+                                : suggestion.type === "bullet"
+                                  ? "🎯 BULLET"
+                                  : "📄 DESC"}
+                            </Badge>
+                          </div>
+                          <p className="font-bold text-sm text-gray-800">{suggestion.suggestion}</p>
+                          <p className="text-xs text-gray-600 font-medium">{suggestion.reason}</p>
                           <Button
-                            type="button"
                             size="sm"
-                            className={`font-bold border-2 rounded-xl ${chosenTitleIdx === idx + 1 ? 'bg-green-500 text-white border-green-700' : 'border-green-400 text-green-700 bg-white hover:bg-green-50'}`}
-                            onClick={() => handleChooseTitle(idx + 1)}
+                            onClick={() => applySuggestion(suggestion)}
+                            className="w-full text-xs font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 border-2 border-yellow-400 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                           >
-                            ^ Choose Title
+                            Apply This Fire 🔥
                           </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            className="font-bold border-2 border-red-400 text-red-700 rounded-xl bg-white hover:bg-red-50"
-                            onClick={() => removeTitle(idx + 1)}
-                            aria-label="Delete title"
+                        </div>
+                      ))
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Competitor Analysis - Right Column */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
+                    <CardTitle className="flex items-center gap-2 text-xl font-black">
+                      <Target className="w-6 h-6" />
+                      Competitor Intel 🕵️
+                    </CardTitle>
+                    <CardDescription className="text-cyan-100 font-medium">
+                      Spying on the competition for "{listingData.heroKeyword}" 👀
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-4">
+                    {!listingData.heroKeyword ? (
+                      <div className="text-center py-12">
+                        <div className="text-6xl mb-4">🤷‍♀️</div>
+                        <p className="text-gray-500 font-medium">Enter your hero keyword to see who's winning!</p>
+                      </div>
+                    ) : competitors.length === 0 ? (
+                      <div className="text-center py-12">
+                        <div className="text-6xl mb-4">🔎</div>
+                        <p className="text-gray-500 font-medium">No competitors found for this keyword yet.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {competitors.map((comp, idx) => (
+                          <div
+                            key={comp.asin}
+                            className="border-3 border-cyan-200 rounded-2xl p-4 flex flex-col gap-2 bg-gradient-to-br from-cyan-50 to-blue-50 hover:shadow-lg transition-all duration-300"
                           >
-                            ^ Delete
-                          </Button>
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-black text-sm text-gray-800 break-words whitespace-normal w-full">{comp.title}</h4>
+                              <Badge
+                                variant="outline"
+                                className="text-xs font-bold border-2 border-cyan-400 text-cyan-600"
+                              >
+                                🏆 Rank #{comp.position}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-gray-700 font-medium">
+                              <span>Reviews: <span className="font-black">{comp.reviews_count}</span></span>
+                              <span>Rating: <span className="font-black">{comp.rating?.toFixed(1) ?? "-"}</span> ⭐</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Column 1: Current Bullet Points */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 flex flex-row items-center justify-between">
+                    <CardTitle className="text-xl font-black">Your Bullet Points</CardTitle>
+                    <Button type="button" size="sm" variant="outline" className="border-gray-400 text-gray-700" onClick={() => setBulletPointMode(false)}>
+                      ← Back to Title
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    <div className="space-y-3">
+                      {listingData.bulletPoints.map((bp, idx) => {
+                        const isSelected = chosenBulletIdxs.includes(idx)
+                        const canSelectMore = isSelected || chosenBulletIdxs.length < 5
+                        return (
+                          <div
+                            key={idx}
+                            className={`flex flex-col gap-1 mb-4 border-2 rounded-xl ${isSelected ? 'border-green-500 bg-green-50' : 'border-green-300 bg-white'}`}
+                          >
+                            <Textarea
+                              rows={2}
+                              value={bp}
+                              onChange={e => setListingData(prev => {
+                                const newBullets = [...prev.bulletPoints]
+                                newBullets[idx] = e.target.value
+                                return { ...prev, bulletPoints: newBullets }
+                              })}
+                              className="rounded-xl flex-1 bg-transparent"
+                              placeholder={`Bullet Point ${idx + 1}`}
+                            />
+                            <div className="flex gap-2 mt-1 justify-end">
+                              <Button
+                                type="button"
+                                size="sm"
+                                className={`font-bold border-2 rounded-xl ${isSelected ? 'bg-green-500 text-white border-green-700' : 'bg-green-100 text-green-700 border-green-400'}`}
+                                onClick={() => {
+                                  setChosenBulletIdxs(prev => {
+                                    if (isSelected) {
+                                      return prev.filter(i => i !== idx)
+                                    } else if (prev.length < 5) {
+                                      return [...prev, idx]
+                                    } else {
+                                      return prev
+                                    }
+                                  })
+                                }}
+                                disabled={!canSelectMore}
+                              >
+                                ^ Choose Bullet
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="font-bold border-2 border-red-400 text-red-700 rounded-xl bg-white hover:bg-red-50"
+                                onClick={() => setListingData(prev => {
+                                  const newBullets = prev.bulletPoints.filter((_, i) => i !== idx)
+                                  // Update chosenBulletIdxs: remove idx, decrement indices > idx
+                                  setChosenBulletIdxs(chosen => chosen
+                                    .filter(i => i !== idx)
+                                    .map(i => (i > idx ? i - 1 : i))
+                                  )
+                                  return { ...prev, bulletPoints: newBullets }
+                                })}
+                                aria-label="Delete bullet point"
+                              >
+                                ^ Delete
+                              </Button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                      <Button type="button" size="sm" variant="outline" className="border-green-400 text-green-700" onClick={() => setListingData(prev => ({ ...prev, bulletPoints: [...prev.bulletPoints, ""] }))}>
+                        + Add Bullet Point
+                      </Button>
+                    </div>
+                    <Button type="button" className="bg-green-500 text-white font-bold rounded-xl mt-4">Save Bullet Points</Button>
+                  </CardContent>
+                </Card>
+                {/* Column 2: AI Suggestions & Gap Analysis */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-yellow-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
+                    <CardTitle className="flex items-center gap-2 text-xl font-black">
+                      <Lightbulb className="w-6 h-6" />
+                      AI Bullet Point Suggestions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-4">
+                    {/* Generate AI Bullet Point Suggestions Button */}
+                    <Button
+                      type="button"
+                      className="font-bold border-2 rounded-xl bg-purple-100 text-purple-700 border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+                      onClick={async () => {
+                        setBulletIdeasLoading(true)
+                        setBulletIdeasError("")
+                        setBulletIdeas(null)
+                        try {
+                          // Gather all competitor bullet points (flattened)
+                          const allCompetitorBullets = competitorDetails.flatMap((c: any) => (c.bullet_points || "").split("\n").filter(Boolean))
+                          const res = await fetch("/api/gpt-suggest", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              "x-ll-ai-action": "bullet-ideas"
+                            },
+                            body: JSON.stringify({ competitorBullets: allCompetitorBullets })
+                          })
+                          if (!res.ok) throw new Error(await res.text())
+                          const data = await res.json()
+                          setBulletIdeas(data)
+                        } catch (err: any) {
+                          setBulletIdeasError(err.message || "Failed to generate bullet point ideas.")
+                        } finally {
+                          setBulletIdeasLoading(false)
+                        }
+                      }}
+                      disabled={bulletIdeasLoading || competitorDetails.length === 0}
+                    >
+                      {bulletIdeasLoading ? "Generating..." : "Generate AI Bullet Point Suggestions"}
+                    </Button>
+                    {bulletIdeasError && <div className="text-xs text-red-600 font-bold mt-2">{bulletIdeasError}</div>}
+                    {/* AI Bullet Point Ideas Cards */}
+                    {bulletIdeas && (
+                      <div className="space-y-4">
+                        {bulletIdeas.map((idea, idx) => (
+                          <div key={idx} className="border-3 border-blue-400 rounded-2xl p-4 space-y-2 bg-gradient-to-br from-blue-50 to-blue-200 shadow-lg flex flex-col">
+                            <div className="font-bold text-md text-gray-900 mb-2">{idea}</div>
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                className="bg-green-500 hover:bg-green-600 text-white font-bold border-2 border-green-700 rounded-xl shadow"
+                                onClick={() => {
+                                  setListingData(prev => ({ ...prev, bulletPoints: [...prev.bulletPoints, idea] }))
+                                  setBulletIdeas(prev => prev ? prev.filter((_, i) => i !== idx) : prev)
+                                }}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-400 text-red-700 font-bold rounded-xl shadow"
+                                onClick={() => setBulletIdeas(prev => prev ? prev.filter((_, i) => i !== idx) : prev)}
+                              >
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+                {/* Column 3: Competitor Bullet Points */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
+                    <CardTitle className="flex items-center gap-2 text-xl font-black">
+                      <Target className="w-6 h-6" />
+                      Competitor Bullet Points
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-4">
+                    {/* Show top 10 competitors' bullet points and descriptions */}
+                    {competitorDetails.map((comp, idx) => (
+                      <div key={comp.asin || idx} className="mb-4 border-2 border-cyan-200 rounded-xl p-3">
+                        <div className="font-bold text-cyan-800 mb-1">{comp.title || <span className="italic text-gray-400">No title</span>}</div>
+                        <div className="mb-1">
+                          <span className="font-bold text-cyan-600 text-xs">Bullet Points:</span>
+                          <ul className="ml-4 mt-1 space-y-1">
+                            {(comp.bullet_points || "").split("\n").filter(Boolean).length > 0 ? (
+                              (comp.bullet_points || "").split("\n").filter(Boolean).map((bp: string, i: number) => (
+                                <li key={i} className="text-xs text-gray-700 bg-cyan-50 rounded px-2 py-1 border border-cyan-100">• {bp}</li>
+                              ))
+                            ) : (
+                              <li className="text-xs text-gray-400 italic">No bullet points found.</li>
+                            )}
+                          </ul>
+                        </div>
+                        <div>
+                          <span className="font-bold text-cyan-600 text-xs">Description:</span>
+                          <div className="text-xs text-gray-700 bg-cyan-50 rounded px-2 py-1 border border-cyan-100 mt-1 whitespace-pre-wrap">
+                            {comp.description ? comp.description : <span className="text-gray-400 italic">No description found.</span>}
+                          </div>
                         </div>
                       </div>
                     ))}
-                    <div className="flex gap-2 mt-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={addTitle}
-                        aria-label="Add another title"
-                      >
-                        + Add Another Title
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="font-bold border-2 rounded-xl bg-blue-100 text-blue-700 border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={!hasChosenTitleThisSession}
-                      >
-                        Next Step: Optimize Bullet Points
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* AI Suggestions - Middle Column */}
-              <Card className="bg-white/95 backdrop-blur-sm border-4 border-yellow-400 shadow-2xl rounded-3xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
-                  <CardTitle className="flex items-center gap-2 text-xl font-black">
-                    <Lightbulb className="w-6 h-6" />
-                    AI Suggestions 🤖
-                  </CardTitle>
-                  <CardDescription className="text-yellow-100 font-medium">
-                    Your personal conversion coach is here! 🚀
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  {/* Add GPT-4o Suggestion Button */}
-                  <div className="mb-4">
-                    <Button
-                      onClick={fetchGptSuggestion}
-                      disabled={gptLoading || !titles[0] || competitors.length === 0}
-                      className="w-full text-xs font-bold bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700 border-2 border-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
-                    >
-                      {gptLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
-                          Generating GPT-4o Suggestion...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Get GPT-4o Optimized Title
-                        </>
-                      )}
-                    </Button>
-                    {gptError && (
-                      <div className="text-xs text-red-600 font-bold mt-2">{gptError}</div>
-                    )}
-                  </div>
-                  {/* Show GPT-4o Suggestion Cards if available */}
-                  {visibleGptSuggestions && (
-                    <div className="grid grid-cols-1 gap-4">
-                      {visibleGptSuggestions.map((sugg, idx) => (
-                        <div
-                          key={idx}
-                          className="border-3 border-black rounded-2xl p-4 space-y-2 bg-gradient-to-br from-gray-50 to-gray-200 shadow-lg"
-                        >
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge className="bg-black text-white text-xs font-black border-2 border-gray-900">GPT-4o</Badge>
-                            <span className="text-xs font-bold text-gray-700">{sugg.focus} Focus</span>
-                          </div>
-                          <div className="font-black text-md text-gray-900 mb-1">{sugg.title}</div>
-                          <div className="flex gap-2 text-xs font-bold">
-                            <span className="bg-green-100 text-green-700 rounded px-2 py-1">CTR: {sugg.ctr_increase}</span>
-                            <span className="bg-blue-100 text-blue-700 rounded px-2 py-1">CR: {sugg.cr_increase}</span>
-                            <span className="bg-yellow-100 text-yellow-700 rounded px-2 py-1">Priority: {sugg.priority}</span>
-                          </div>
-                          <div className="text-xs text-gray-700 font-medium mt-1">{sugg.justification}</div>
-                          <div className="flex gap-2 mt-2">
-                            <Button
-                              size="sm"
-                              className="bg-green-500 hover:bg-green-600 text-white font-bold border-2 border-green-700 rounded-xl shadow"
-                              onClick={() => handleAcceptSuggestion(sugg.title)}
-                            >
-                              Accept
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-red-400 text-red-700 font-bold rounded-xl shadow"
-                              onClick={() => handleRejectSuggestion(idx)}
-                            >
-                              Reject
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {suggestions.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className="text-6xl mb-4">🤖</div>
-                      <p className="text-gray-500 font-medium">Generate suggestions to unlock the AI magic!</p>
-                    </div>
-                  ) : (
-                    suggestions.map((suggestion, index) => (
-                      <div
-                        key={index}
-                        className="border-3 border-yellow-200 rounded-2xl p-4 space-y-3 bg-gradient-to-br from-yellow-50 to-orange-50 hover:shadow-lg transition-all duration-300"
-                      >
-                        <div className="flex items-center justify-between">
-                          <Badge
-                            variant={
-                              suggestion.impact === "high"
-                                ? "destructive"
-                                : suggestion.impact === "medium"
-                                  ? "default"
-                                  : "secondary"
-                            }
-                            className={`text-xs font-black border-2 ${
-                              suggestion.impact === "high"
-                                ? "bg-red-500 border-red-400"
-                                : suggestion.impact === "medium"
-                                  ? "bg-orange-500 border-orange-400"
-                                  : "bg-gray-500 border-gray-400"
-                            }`}
-                          >
-                            {suggestion.impact === "high"
-                              ? "🔥 HIGH"
-                              : suggestion.impact === "medium"
-                                ? "⚡ MED"
-                                : "💡 LOW"}
-                          </Badge>
-                          <Badge
-                            variant="outline"
-                            className="text-xs font-bold border-2 border-yellow-400 text-yellow-600"
-                          >
-                            {suggestion.type === "title"
-                              ? "📝 TITLE"
-                              : suggestion.type === "bullet"
-                                ? "🎯 BULLET"
-                                : "📄 DESC"}
-                          </Badge>
-                        </div>
-                        <p className="font-bold text-sm text-gray-800">{suggestion.suggestion}</p>
-                        <p className="text-xs text-gray-600 font-medium">{suggestion.reason}</p>
-                        <Button
-                          size="sm"
-                          onClick={() => applySuggestion(suggestion)}
-                          className="w-full text-xs font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 border-2 border-yellow-400 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-                        >
-                          Apply This Fire 🔥
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Competitor Analysis - Right Column */}
-              <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
-                  <CardTitle className="flex items-center gap-2 text-xl font-black">
-                    <Target className="w-6 h-6" />
-                    Competitor Intel 🕵️
-                  </CardTitle>
-                  <CardDescription className="text-cyan-100 font-medium">
-                    Spying on the competition for "{listingData.heroKeyword}" 👀
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  {!listingData.heroKeyword ? (
-                    <div className="text-center py-12">
-                      <div className="text-6xl mb-4">🤷‍♀️</div>
-                      <p className="text-gray-500 font-medium">Enter your hero keyword to see who's winning!</p>
-                    </div>
-                  ) : competitors.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className="text-6xl mb-4">🔎</div>
-                      <p className="text-gray-500 font-medium">No competitors found for this keyword yet.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {competitors.map((comp, idx) => (
-                        <div
-                          key={comp.asin}
-                          className="border-3 border-cyan-200 rounded-2xl p-4 flex flex-col gap-2 bg-gradient-to-br from-cyan-50 to-blue-50 hover:shadow-lg transition-all duration-300"
-                        >
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-black text-sm text-gray-800 break-words whitespace-normal w-full">{comp.title}</h4>
-                            <Badge
-                              variant="outline"
-                              className="text-xs font-bold border-2 border-cyan-400 text-cyan-600"
-                            >
-                              🏆 Rank #{comp.position}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-4 text-xs text-gray-700 font-medium">
-                            <span>Reviews: <span className="font-black">{comp.reviews_count}</span></span>
-                            <span>Rating: <span className="font-black">{comp.rating?.toFixed(1) ?? "-"}</span> ⭐</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="preview" className="space-y-6">
