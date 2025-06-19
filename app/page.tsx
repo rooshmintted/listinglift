@@ -156,6 +156,32 @@ export default function ListingLiftAI() {
   const [gptLoading, setGptLoading] = useState(false)
   const [gptError, setGptError] = useState("")
 
+  // Add after gptSuggestions state:
+  const [keywordGapResult, setKeywordGapResult] = useState<any>(null)
+  const [keywordGapLoading, setKeywordGapLoading] = useState(false)
+  const [keywordGapError, setKeywordGapError] = useState("")
+
+  // Add state to track when to trigger analysis
+  const [shouldAnalyzeKeywords, setShouldAnalyzeKeywords] = useState(false)
+  const [lastAnalyzed, setLastAnalyzed] = useState(0)
+
+  // Add local state for visible AI suggestions
+  const [visibleGptSuggestions, setVisibleGptSuggestions] = useState<Array<any> | null>(null)
+
+  // When gptSuggestions changes, update visibleGptSuggestions
+  useEffect(() => {
+    setVisibleGptSuggestions(gptSuggestions)
+  }, [gptSuggestions])
+
+  // Handler for Accept
+  function handleAcceptSuggestion(suggestionTitle: string) {
+    setTitles(prev => [...prev, suggestionTitle])
+  }
+  // Handler for Reject
+  function handleRejectSuggestion(idx: number) {
+    setVisibleGptSuggestions(prev => prev ? prev.filter((_, i) => i !== idx) : prev)
+  }
+
   /**
    * Adds a new empty product title field.
    */
@@ -383,6 +409,56 @@ export default function ListingLiftAI() {
       setGptLoading(false)
     }
   }
+
+  // Refactor useEffect: only run on tab change to 'optimize' or when shouldAnalyzeKeywords is set
+  useEffect(() => {
+    if (activeTab !== "optimize") return
+    // Only fire on first load of optimize tab or when shouldAnalyzeKeywords is set
+    if (!shouldAnalyzeKeywords && lastAnalyzed > 0) return
+    const currentTitle = titles[0] || listingData.title || ""
+    const competitorTitles = competitors.map(c => c.title).filter(Boolean)
+    if (!currentTitle || competitorTitles.length === 0) return
+    setKeywordGapLoading(true)
+    setKeywordGapError("")
+    setKeywordGapResult(null)
+    fetch("/api/gpt-suggest", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-ll-ai-action": "keyword-gap"
+      },
+      body: JSON.stringify({ currentTitle, competitorTitles })
+    })
+      .then(async res => {
+        if (!res.ok) throw new Error(await res.text())
+        let text = await res.text()
+        // Clean Markdown code block wrappers (```json ... ```)
+        let clean = text
+          .replace(/^```json\s*/i, "")
+          .replace(/^```/, "")
+          .replace(/```$/, "")
+          .trim()
+        try {
+          return JSON.parse(clean)
+        } catch {
+          throw new Error("Malformed keyword gap response")
+        }
+      })
+      .then(data => setKeywordGapResult(data))
+      .catch(err => setKeywordGapError(err.message || "Failed to get keyword gap analysis."))
+      .finally(() => {
+        setKeywordGapLoading(false)
+        setShouldAnalyzeKeywords(false)
+        setLastAnalyzed(Date.now())
+      })
+  }, [activeTab, shouldAnalyzeKeywords])
+
+  // On first load of optimize tab, trigger analysis
+  useEffect(() => {
+    if (activeTab === "optimize" && lastAnalyzed === 0) {
+      setShouldAnalyzeKeywords(true)
+    }
+  }, [activeTab, lastAnalyzed])
 
   // Show loading spinner while checking auth
   if (loading) {
@@ -904,9 +980,76 @@ export default function ListingLiftAI() {
                 <BarChart3 className="w-6 h-6 text-orange-400" />
                 Keywords
               </h2>
-              <div className="flex-1 flex items-center justify-center text-gray-400 italic text-sm">
-                {/* Placeholder for future keyword content */}
-                (Keyword tools coming soon)
+              <div className="absolute top-6 right-6">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-blue-400 text-blue-700 font-bold px-4 py-2 rounded-xl shadow"
+                  onClick={() => setShouldAnalyzeKeywords(true)}
+                  disabled={keywordGapLoading}
+                  aria-label="Re-analyze Keywords"
+                >
+                  {keywordGapLoading ? (
+                    <span className="flex items-center gap-2"><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></span>Analyzing...</span>
+                  ) : (
+                    <>Re-analyze</>
+                  )}
+                </Button>
+              </div>
+              <div className="flex-1">
+                {keywordGapLoading && <div className="text-blue-600 font-bold">Analyzing keyword gaps...</div>}
+                {keywordGapError && <div className="text-red-600 font-bold">{keywordGapError}</div>}
+                {keywordGapResult && (
+                  <div className="space-y-4">
+                    {/* High Value Gaps */}
+                    <div>
+                      <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
+                        <Badge className="bg-blue-600 text-white text-xs font-black border-2 border-blue-900">High Value Gaps</Badge>
+                        <span className="text-xs text-blue-900">(Add these to your title!)</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {(keywordGapResult.high_value_gaps || []).length > 0 ? (
+                          keywordGapResult.high_value_gaps.map((kw: string) => (
+                            <Badge key={kw} className="bg-blue-100 text-blue-800 border-blue-300 font-bold text-xs">{kw}</Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-gray-500">No high value gaps found.</span>
+                        )}
+                      </div>
+                    </div>
+                    {/* Missing Keywords */}
+                    <div>
+                      <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
+                        <Badge className="bg-cyan-600 text-white text-xs font-black border-2 border-cyan-900">Missing Keywords</Badge>
+                        <span className="text-xs text-cyan-900">(From competitors, not in your title)</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {(keywordGapResult.missing_keywords || []).length > 0 ? (
+                          keywordGapResult.missing_keywords.map((kw: any, i: number) => (
+                            <Badge key={kw.keyword + i} className="bg-cyan-100 text-cyan-800 border-cyan-300 font-bold text-xs">{kw.keyword}</Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-gray-500">No missing keywords found.</span>
+                        )}
+                      </div>
+                    </div>
+                    {/* Our Existing Keywords */}
+                    <div>
+                      <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
+                        <Badge className="bg-green-600 text-white text-xs font-black border-2 border-green-900">Your Title Keywords</Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {(keywordGapResult.our_existing_keywords || []).length > 0 ? (
+                          keywordGapResult.our_existing_keywords.map((kw: string) => (
+                            <Badge key={kw} className="bg-green-100 text-green-800 border-green-300 font-bold text-xs">{kw}</Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-gray-500">No keywords found in your title.</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             {/* Logout button, absolutely positioned */}
@@ -1020,59 +1163,10 @@ export default function ListingLiftAI() {
 
           <TabsContent value="optimize" className="space-y-6">
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              {/* Competitor Analysis - Left Column */}
-              <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
-                  <CardTitle className="flex items-center gap-2 text-xl font-black">
-                    <Target className="w-6 h-6" />
-                    Competitor Intel 🕵️
-                  </CardTitle>
-                  <CardDescription className="text-cyan-100 font-medium">
-                    Spying on the competition for "{listingData.heroKeyword}" 👀
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  {!listingData.heroKeyword ? (
-                    <div className="text-center py-12">
-                      <div className="text-6xl mb-4">🤷‍♀️</div>
-                      <p className="text-gray-500 font-medium">Enter your hero keyword to see who's winning!</p>
-                    </div>
-                  ) : competitors.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className="text-6xl mb-4">🔎</div>
-                      <p className="text-gray-500 font-medium">No competitors found for this keyword yet.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {competitors.map((comp, idx) => (
-                        <div
-                          key={comp.asin}
-                          className="border-3 border-cyan-200 rounded-2xl p-4 flex flex-col gap-2 bg-gradient-to-br from-cyan-50 to-blue-50 hover:shadow-lg transition-all duration-300"
-                        >
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-black text-sm text-gray-800 break-words whitespace-normal w-full">{comp.title}</h4>
-                            <Badge
-                              variant="outline"
-                              className="text-xs font-bold border-2 border-cyan-400 text-cyan-600"
-                            >
-                              🏆 Rank #{comp.position}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-4 text-xs text-gray-700 font-medium">
-                            <span>Reviews: <span className="font-black">{comp.reviews_count}</span></span>
-                            <span>Rating: <span className="font-black">{comp.rating?.toFixed(1) ?? "-"}</span> ⭐</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Editable Content - Middle Column */}
+              {/* Editable Content - Left Column */}
               <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
-                  <CardTitle className="text-xl font-black">Your Listing Glow-Up ✨</CardTitle>
+                  <CardTitle className="text-xl font-black">Your Current Title</CardTitle>
                   <CardDescription className="text-green-100 font-medium">
                     Time to make your listing absolutely iconic 💅
                   </CardDescription>
@@ -1081,29 +1175,34 @@ export default function ListingLiftAI() {
                   <div className="space-y-3">
                     <Label className="text-sm font-black text-gray-800 flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-green-500" />
-                      Product Titles
+                      Current Title
                     </Label>
-                    {titles.map((title, idx) => (
-                      <div key={idx} className="flex items-center gap-2 mb-2">
+                    <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 font-bold text-gray-800 mb-4">
+                      {titles[0] || listingData.title || <span className="italic text-gray-400">No title yet</span>}
+                    </div>
+                    <Label className="text-sm font-black text-gray-800 flex items-center gap-2 mt-6">
+                      <Sparkles className="w-4 h-4 text-green-500" />
+                      New Title Options
+                    </Label>
+                    {titles.slice(1).map((title, idx) => (
+                      <div key={idx + 1} className="flex items-center gap-2 mb-2">
                         <Textarea
                           rows={5}
                           placeholder="Make it pop! Front-load your keyword and add some spice... 🌶️"
                           value={title}
-                          onChange={e => updateTitle(idx, e.target.value)}
+                          onChange={e => updateTitle(idx + 1, e.target.value)}
                           className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium flex-1"
                         />
-                        {titles.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => removeTitle(idx)}
-                            className="ml-2 scale-50 p-1 h-6 w-6 min-w-0 min-h-0 flex items-center justify-center"
-                            aria-label="Remove title"
-                          >
-                            –
-                          </Button>
-                        )}
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => removeTitle(idx + 1)}
+                          className="ml-2 scale-50 p-1 h-6 w-6 min-w-0 min-h-0 flex items-center justify-center"
+                          aria-label="Remove title"
+                        >
+                          –
+                        </Button>
                       </div>
                     ))}
                     <Button
@@ -1120,7 +1219,7 @@ export default function ListingLiftAI() {
                 </CardContent>
               </Card>
 
-              {/* AI Suggestions - Right Column */}
+              {/* AI Suggestions - Middle Column */}
               <Card className="bg-white/95 backdrop-blur-sm border-4 border-yellow-400 shadow-2xl rounded-3xl overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
                   <CardTitle className="flex items-center gap-2 text-xl font-black">
@@ -1156,9 +1255,9 @@ export default function ListingLiftAI() {
                     )}
                   </div>
                   {/* Show GPT-4o Suggestion Cards if available */}
-                  {gptSuggestions && (
+                  {visibleGptSuggestions && (
                     <div className="grid grid-cols-1 gap-4">
-                      {gptSuggestions.map((sugg, idx) => (
+                      {visibleGptSuggestions.map((sugg, idx) => (
                         <div
                           key={idx}
                           className="border-3 border-black rounded-2xl p-4 space-y-2 bg-gradient-to-br from-gray-50 to-gray-200 shadow-lg"
@@ -1174,6 +1273,23 @@ export default function ListingLiftAI() {
                             <span className="bg-yellow-100 text-yellow-700 rounded px-2 py-1">Priority: {sugg.priority}</span>
                           </div>
                           <div className="text-xs text-gray-700 font-medium mt-1">{sugg.justification}</div>
+                          <div className="flex gap-2 mt-2">
+                            <Button
+                              size="sm"
+                              className="bg-green-500 hover:bg-green-600 text-white font-bold border-2 border-green-700 rounded-xl shadow"
+                              onClick={() => handleAcceptSuggestion(sugg.title)}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-red-400 text-red-700 font-bold rounded-xl shadow"
+                              onClick={() => handleRejectSuggestion(idx)}
+                            >
+                              Reject
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1234,6 +1350,55 @@ export default function ListingLiftAI() {
                         </Button>
                       </div>
                     ))
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Competitor Analysis - Right Column */}
+              <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
+                  <CardTitle className="flex items-center gap-2 text-xl font-black">
+                    <Target className="w-6 h-6" />
+                    Competitor Intel 🕵️
+                  </CardTitle>
+                  <CardDescription className="text-cyan-100 font-medium">
+                    Spying on the competition for "{listingData.heroKeyword}" 👀
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 space-y-4">
+                  {!listingData.heroKeyword ? (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">🤷‍♀️</div>
+                      <p className="text-gray-500 font-medium">Enter your hero keyword to see who's winning!</p>
+                    </div>
+                  ) : competitors.length === 0 ? (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">🔎</div>
+                      <p className="text-gray-500 font-medium">No competitors found for this keyword yet.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {competitors.map((comp, idx) => (
+                        <div
+                          key={comp.asin}
+                          className="border-3 border-cyan-200 rounded-2xl p-4 flex flex-col gap-2 bg-gradient-to-br from-cyan-50 to-blue-50 hover:shadow-lg transition-all duration-300"
+                        >
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-black text-sm text-gray-800 break-words whitespace-normal w-full">{comp.title}</h4>
+                            <Badge
+                              variant="outline"
+                              className="text-xs font-bold border-2 border-cyan-400 text-cyan-600"
+                            >
+                              🏆 Rank #{comp.position}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-4 text-xs text-gray-700 font-medium">
+                            <span>Reviews: <span className="font-black">{comp.reviews_count}</span></span>
+                            <span>Rating: <span className="font-black">{comp.rating?.toFixed(1) ?? "-"}</span> ⭐</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </CardContent>
               </Card>
