@@ -34,13 +34,16 @@ async function saveProductToSupabase(product: any): Promise<any> {
 
 /**
  * Saves all organic search results to the 'search_results' table in Supabase.
+ * Filters out results with less than 50 reviews.
  * @param heroKeyword - The hero keyword used for the search
  * @param organicResults - Array of organic result objects from Decodo search
  * @throws Error on Supabase insert failure
  */
 async function saveSearchResultsToSupabase(heroKeyword: string, organicResults: any[]): Promise<any> {
   if (!Array.isArray(organicResults)) throw new Error("organicResults must be an array")
-  const rows = organicResults.map((item, idx) => ({
+  // Filter out results with less than 50 reviews
+  const filteredResults = organicResults.filter(item => (item.reviews_count ?? 0) >= 50)
+  const rows = filteredResults.map((item, idx) => ({
     hero_keyword: heroKeyword,
     asin: item.asin,
     title: item.title,
@@ -49,6 +52,7 @@ async function saveSearchResultsToSupabase(heroKeyword: string, organicResults: 
     position: item.pos || idx + 1,
     created_at: new Date().toISOString(),
   }))
+  if (rows.length === 0) return []
   const { data, error } = await supabase.from("search_results").insert(rows)
   if (error) throw error
   return data
@@ -103,10 +107,13 @@ export async function scrapeDecodo(params: Record<string, any>): Promise<any> {
     console.log("[Decodo] Product(s) saved to Supabase")
   }
   if (params.target === "amazon_search" && data.results[0].content.results.results.organic) {
-    console.log("[Decodo] Saving search results to Supabase", data.results[0].content.results.results.organic)
+    // Filter organic results with less than 50 reviews before saving
+    const organicResults = data.results[0].content.results.results.organic
+    const filteredOrganicResults = organicResults.filter((item: any) => (item.reviews_count ?? 0) >= 50)
+    console.log("[Decodo] Saving filtered search results to Supabase", filteredOrganicResults)
     await saveSearchResultsToSupabase(
       data.results[0].content.results.query || params.query,
-      data.results[0].content.results.results.organic
+      filteredOrganicResults
     )
     console.log("[Decodo] Search results saved to Supabase")
   }

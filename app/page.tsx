@@ -143,6 +143,20 @@ export default function ListingLiftAI() {
   const [titles, setTitles] = useState<string[]>([""])
 
   /**
+   * State for GPT-4o title suggestions (array) and loading/error.
+   */
+  const [gptSuggestions, setGptSuggestions] = useState<null | Array<{
+    title: string
+    ctr_increase: string
+    cr_increase: string
+    justification: string
+    priority: string
+    focus: string
+  }>>(null)
+  const [gptLoading, setGptLoading] = useState(false)
+  const [gptError, setGptError] = useState("")
+
+  /**
    * Adds a new empty product title field.
    */
   function addTitle() {
@@ -340,6 +354,34 @@ export default function ListingLiftAI() {
       asin: "B07DJ1KVDP",
       heroKeyword: "matcha powder"
     }))
+  }
+
+  /**
+   * Calls the /api/gpt-suggest endpoint to get GPT-4o optimized title suggestions.
+   * Uses the first title as the current title and competitor titles from the competitors state.
+   */
+  async function fetchGptSuggestion() {
+    setGptLoading(true)
+    setGptError("")
+    setGptSuggestions(null)
+    try {
+      const currentTitle = titles[0] || listingData.title || ""
+      const competitorTitles = competitors.map(c => c.title).filter(Boolean)
+      const heroKeyword = listingData.heroKeyword || ""
+      const res = await fetch("/api/gpt-suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentTitle, competitorTitles, heroKeyword })
+      })
+      if (!res.ok) throw new Error(await res.text())
+      const data = await res.json()
+      if (!Array.isArray(data) || data.length === 0) throw new Error("No suggestions returned.")
+      setGptSuggestions(data)
+    } catch (err: any) {
+      setGptError(err.message || "Failed to get suggestion.")
+    } finally {
+      setGptLoading(false)
+    }
   }
 
   // Show loading spinner while checking auth
@@ -1090,6 +1132,52 @@ export default function ListingLiftAI() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
+                  {/* Add GPT-4o Suggestion Button */}
+                  <div className="mb-4">
+                    <Button
+                      onClick={fetchGptSuggestion}
+                      disabled={gptLoading || !titles[0] || competitors.length === 0}
+                      className="w-full text-xs font-bold bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700 border-2 border-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
+                    >
+                      {gptLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                          Generating GPT-4o Suggestion...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Get GPT-4o Optimized Title
+                        </>
+                      )}
+                    </Button>
+                    {gptError && (
+                      <div className="text-xs text-red-600 font-bold mt-2">{gptError}</div>
+                    )}
+                  </div>
+                  {/* Show GPT-4o Suggestion Cards if available */}
+                  {gptSuggestions && (
+                    <div className="grid grid-cols-1 gap-4">
+                      {gptSuggestions.map((sugg, idx) => (
+                        <div
+                          key={idx}
+                          className="border-3 border-black rounded-2xl p-4 space-y-2 bg-gradient-to-br from-gray-50 to-gray-200 shadow-lg"
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge className="bg-black text-white text-xs font-black border-2 border-gray-900">GPT-4o</Badge>
+                            <span className="text-xs font-bold text-gray-700">{sugg.focus} Focus</span>
+                          </div>
+                          <div className="font-black text-md text-gray-900 mb-1">{sugg.title}</div>
+                          <div className="flex gap-2 text-xs font-bold">
+                            <span className="bg-green-100 text-green-700 rounded px-2 py-1">CTR: {sugg.ctr_increase}</span>
+                            <span className="bg-blue-100 text-blue-700 rounded px-2 py-1">CR: {sugg.cr_increase}</span>
+                            <span className="bg-yellow-100 text-yellow-700 rounded px-2 py-1">Priority: {sugg.priority}</span>
+                          </div>
+                          <div className="text-xs text-gray-700 font-medium mt-1">{sugg.justification}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {suggestions.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="text-6xl mb-4">🤖</div>
