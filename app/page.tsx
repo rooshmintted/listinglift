@@ -168,6 +168,10 @@ export default function ListingLiftAI() {
   // Add local state for visible AI suggestions
   const [visibleGptSuggestions, setVisibleGptSuggestions] = useState<Array<any> | null>(null)
 
+  // Add state to track the chosen title index and if a title has been chosen this session
+  const [chosenTitleIdx, setChosenTitleIdx] = useState<number | null>(null)
+  const [hasChosenTitleThisSession, setHasChosenTitleThisSession] = useState(false)
+
   // When gptSuggestions changes, update visibleGptSuggestions
   useEffect(() => {
     setVisibleGptSuggestions(gptSuggestions)
@@ -459,6 +463,12 @@ export default function ListingLiftAI() {
       setShouldAnalyzeKeywords(true)
     }
   }, [activeTab, lastAnalyzed])
+
+  // Handler for choosing a title
+  function handleChooseTitle(idx: number) {
+    setChosenTitleIdx(idx)
+    setHasChosenTitleThisSession(true)
+  }
 
   // Show loading spinner while checking auth
   if (loading) {
@@ -1177,44 +1187,67 @@ export default function ListingLiftAI() {
                       <Sparkles className="w-4 h-4 text-green-500" />
                       Current Title
                     </Label>
-                    <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 font-bold text-gray-800 mb-4">
+                    <div className={`bg-green-50 border-2 rounded-xl p-4 font-bold text-gray-800 mb-4 ${chosenTitleIdx === null ? 'border-green-500 ring-2 ring-green-400' : 'border-green-200'}`}
+                    >
                       {titles[0] || listingData.title || <span className="italic text-gray-400">No title yet</span>}
                     </div>
                     <Label className="text-sm font-black text-gray-800 flex items-center gap-2 mt-6">
                       <Sparkles className="w-4 h-4 text-green-500" />
                       New Title Options
                     </Label>
+                    {titles.length <= 1 && (
+                      <div className="italic text-gray-400 mb-2">No new title options yet. Add one or accept an AI suggestion!</div>
+                    )}
                     {titles.slice(1).map((title, idx) => (
-                      <div key={idx + 1} className="flex items-center gap-2 mb-2">
+                      <div key={idx + 1} className={`mb-4 border-2 rounded-xl p-2 ${chosenTitleIdx === idx + 1 ? 'border-green-500 ring-2 ring-green-400' : 'border-transparent'}`}>
                         <Textarea
                           rows={5}
                           placeholder="Make it pop! Front-load your keyword and add some spice... 🌶️"
                           value={title}
                           onChange={e => updateTitle(idx + 1, e.target.value)}
-                          className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium flex-1"
+                          className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium w-full"
                         />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => removeTitle(idx + 1)}
-                          className="ml-2 scale-50 p-1 h-6 w-6 min-w-0 min-h-0 flex items-center justify-center"
-                          aria-label="Remove title"
-                        >
-                          –
-                        </Button>
+                        <div className="flex gap-2 mt-2 justify-end">
+                          <Button
+                            type="button"
+                            size="sm"
+                            className={`font-bold border-2 rounded-xl ${chosenTitleIdx === idx + 1 ? 'bg-green-500 text-white border-green-700' : 'border-green-400 text-green-700 bg-white hover:bg-green-50'}`}
+                            onClick={() => handleChooseTitle(idx + 1)}
+                          >
+                            ^ Choose Title
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="font-bold border-2 border-red-400 text-red-700 rounded-xl bg-white hover:bg-red-50"
+                            onClick={() => removeTitle(idx + 1)}
+                            aria-label="Delete title"
+                          >
+                            ^ Delete
+                          </Button>
+                        </div>
                       </div>
                     ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={addTitle}
-                      className="mt-2"
-                      aria-label="Add another title"
-                    >
-                      + Add Another Title
-                    </Button>
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addTitle}
+                        aria-label="Add another title"
+                      >
+                        + Add Another Title
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="font-bold border-2 rounded-xl bg-blue-100 text-blue-700 border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={!hasChosenTitleThisSession}
+                      >
+                        Next Step: Optimize Bullet Points
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
