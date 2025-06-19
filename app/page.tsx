@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,6 +30,7 @@ import {
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import type { User } from "@supabase/supabase-js"
+import { scrapeDecodo } from "../lib/decodo"
 
 interface ListingData {
   asin: string
@@ -47,6 +48,23 @@ interface AISuggestion {
 }
 
 type PageState = "landing" | "signup" | "login" | "app"
+
+/**
+ * Fetches the product title from Supabase by ASIN.
+ * @param asin - The product ASIN
+ * @returns The product title or an empty string
+ */
+async function fetchProductTitle(asin: string): Promise<string> {
+  if (!asin) return ""
+  const { data, error } = await supabase
+    .from("products")
+    .select("title")
+    .eq("asin", asin)
+    .limit(1)
+    .single()
+  if (error || !data?.title) return ""
+  return data.title
+}
 
 export default function ListingLiftAI() {
   const [currentPage, setCurrentPage] = useState<PageState>("landing")
@@ -72,6 +90,8 @@ export default function ListingLiftAI() {
   })
   const [authLoading, setAuthLoading] = useState(false)
   const [authError, setAuthError] = useState("")
+
+  const [error, setError] = useState("")
 
   // Check for existing session on mount
   useEffect(() => {
@@ -110,40 +130,142 @@ export default function ListingLiftAI() {
     }))
   }
 
+  // Add new state for competitors after suggestions state
+  const [competitors, setCompetitors] = useState<{
+    asin: string
+    title: string
+    reviews_count: number
+    rating: number
+    position: number
+  }[]>([])
+
+  // Add at the top of the component, after useState declarations
+  const [titles, setTitles] = useState<string[]>([""])
+
+  /**
+   * Adds a new empty product title field.
+   */
+  function addTitle() {
+    setTitles((prev) => [...prev, ""])
+  }
+
+  /**
+   * Removes a product title field by index.
+   * @param idx - Index of the title to remove
+   */
+  function removeTitle(idx: number) {
+    setTitles((prev) => prev.filter((_, i) => i !== idx))
+  }
+
+  /**
+   * Updates a product title by index.
+   * @param idx - Index of the title to update
+   * @param value - New title value
+   */
+  function updateTitle(idx: number, value: string) {
+    setTitles((prev) => prev.map((t, i) => (i === idx ? value : t)))
+  }
+
+  /**
+   * Fetches the top 10 competitors for the current hero keyword from Supabase.
+   * @param heroKeyword - The hero keyword to search for
+   */
+  const fetchCompetitors = useCallback(async (heroKeyword: string) => {
+    if (!heroKeyword) return
+    const { data, error } = await supabase
+      .from("search_results")
+      .select("asin, title, reviews_count, rating, position")
+      .eq("hero_keyword", heroKeyword)
+      .order("position", { ascending: true })
+      .limit(10)
+    if (error) throw error
+    setCompetitors(data || [])
+  }, [])
+
+  /**
+   * Generates AI suggestions by scraping product and search data from Decodo API.
+   * Calls the /api/decodo API route (server-side) instead of scrapeDecodo directly.
+   * Updates state with suggestions or error messages.
+   */
   const generateSuggestions = async () => {
     setIsAnalyzing(true)
+    setError("")
+    try {
+      // 1. Check if product exists in Supabase
+      let productExists = false
+      if (listingData.asin) {
+        const { data: productRows, error: productError } = await supabase
+          .from("products")
+          .select("asin")
+          .eq("asin", listingData.asin)
+          .limit(1)
+        if (productError) throw productError
+        productExists = !!(productRows && productRows.length > 0)
+      }
 
-    setTimeout(() => {
-      const mockSuggestions: AISuggestion[] = [
-        {
-          type: "title",
-          suggestion:
-            'Front-load your hero keyword and add power words like "Ultimate" or "Game-Changing" for maximum impact! 🔥',
-          reason:
-            "Keywords at the start = better search ranking. Power words = higher click-through rates. It's giving main character energy! ✨",
-          impact: "high",
-        },
-        {
-          type: "bullet",
-          suggestion:
-            "Lead with benefits, not boring features. Use numbers, emojis, and create FOMO with words like 'exclusive' and 'limited'! 💯",
-          reason:
-            "Gen Z shoppers want instant gratification and social proof. Benefits > features always hits different! 🎯",
-          impact: "high",
-        },
-        {
-          type: "description",
-          suggestion:
-            "Start with a hook that addresses pain points, add social proof, and end with urgency. Make it scannable with short paragraphs! 📱",
-          reason: "Attention spans are short. Hook + proof + urgency = conversion formula that actually works! 🚀",
-          impact: "medium",
-        },
-      ]
+      // 2. Check if competitors exist in Supabase for hero keyword
+      let competitorsExist = false
+      if (listingData.heroKeyword) {
+        const { data: competitorRows, error: competitorError } = await supabase
+          .from("search_results")
+          .select("asin")
+          .eq("hero_keyword", listingData.heroKeyword)
+          .limit(1)
+        if (competitorError) throw competitorError
+        competitorsExist = !!(competitorRows && competitorRows.length > 0)
+      }
 
-      setSuggestions(mockSuggestions)
-      setIsAnalyzing(false)
+      // 3. Only call Decodo if data is missing
+      if (!productExists && listingData.asin) {
+        console.log("[AI] Starting Decodo product scrape", { asin: listingData.asin })
+        const productRes = await fetch("/api/decodo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            target: "amazon_product",
+            query: listingData.asin,
+            parse: true,
+            autoselect_variant: false,
+          }),
+        })
+        if (!productRes.ok) throw new Error("Product scrape failed: " + (await productRes.text()))
+        const productData = await productRes.json()
+        console.log("[AI] Decodo product scrape response", productData)
+      } else {
+        console.log("[AI] Product already exists in Supabase, skipping Decodo product call.")
+      }
+
+      if (!competitorsExist && listingData.heroKeyword) {
+        console.log("[AI] Starting Decodo search scrape", { heroKeyword: listingData.heroKeyword })
+        const searchRes = await fetch("/api/decodo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            target: "amazon_search",
+            query: listingData.heroKeyword,
+            page_from: "1",
+            parse: true,
+          }),
+        })
+        if (!searchRes.ok) throw new Error("Search scrape failed: " + (await searchRes.text()))
+        const searchData = await searchRes.json()
+        console.log("[AI] Decodo search scrape response", searchData)
+      } else {
+        console.log("[AI] Competitors already exist in Supabase, skipping Decodo search call.")
+      }
+
+      // Always fetch competitors from Supabase for UI
+      await fetchCompetitors(listingData.heroKeyword)
+      // Fetch product title and set as first title in titles array
+      const dbTitle = await fetchProductTitle(listingData.asin)
+      if (dbTitle) setTitles((prev) => [dbTitle, ...prev.slice(1)])
       setActiveTab("optimize")
-    }, 2000)
+    } catch (error: any) {
+      setError(error.message || "Failed to generate suggestions.")
+    } finally {
+      console.log("[AI] Finished generating suggestions")
+      setIsAnalyzing(false)
+    }
   }
 
   const applySuggestion = (suggestion: AISuggestion) => {
@@ -210,6 +332,15 @@ export default function ListingLiftAI() {
       <div className="absolute bottom-20 right-20 w-28 h-28 bg-red-300 rounded-full blur-lg"></div>
     </div>
   )
+
+  // Handler to load sample data into ASIN and hero keyword fields
+  function handleLoadSampleData() {
+    setListingData((prev: ListingData) => ({
+      ...prev,
+      asin: "B07DJ1KVDP",
+      heroKeyword: "matcha powder"
+    }))
+  }
 
   // Show loading spinner while checking auth
   if (loading) {
@@ -690,7 +821,10 @@ export default function ListingLiftAI() {
                 {/* Tab-specific buttons */}
                 {activeTab === "input" && (
                   <>
-                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl border-2 border-blue-400 text-sm">
+                    <Button
+                      className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl border-2 border-blue-400 text-sm"
+                      onClick={handleLoadSampleData}
+                    >
                       <Target className="w-4 h-4 mr-2" />
                       Load Sample Data
                     </Button>
@@ -814,7 +948,10 @@ export default function ListingLiftAI() {
 
                 <div className="text-center pt-4">
                   <Button
-                    onClick={generateSuggestions}
+                    onClick={() => {
+                      console.log("[UI] Generate AI Magic button clicked", { asin: listingData.asin, heroKeyword: listingData.heroKeyword })
+                      generateSuggestions()
+                    }}
                     className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-xl px-12 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-orange-400 hover:border-orange-300"
                     size="lg"
                     disabled={!listingData.asin || !listingData.heroKeyword || isAnalyzing}
@@ -855,47 +992,30 @@ export default function ListingLiftAI() {
                       <div className="text-6xl mb-4">🤷‍♀️</div>
                       <p className="text-gray-500 font-medium">Enter your hero keyword to see who's winning!</p>
                     </div>
+                  ) : competitors.length === 0 ? (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">🔎</div>
+                      <p className="text-gray-500 font-medium">No competitors found for this keyword yet.</p>
+                    </div>
                   ) : (
                     <div className="space-y-4">
-                      {[1, 2, 3].map((index) => (
+                      {competitors.map((comp, idx) => (
                         <div
-                          key={index}
-                          className="border-3 border-cyan-200 rounded-2xl p-4 space-y-3 bg-gradient-to-br from-cyan-50 to-blue-50 hover:shadow-lg transition-all duration-300"
+                          key={comp.asin}
+                          className="border-3 border-cyan-200 rounded-2xl p-4 flex flex-col gap-2 bg-gradient-to-br from-cyan-50 to-blue-50 hover:shadow-lg transition-all duration-300"
                         >
                           <div className="flex items-center justify-between">
-                            <h4 className="font-black text-sm text-gray-800">Top Competitor #{index}</h4>
+                            <h4 className="font-black text-sm text-gray-800 break-words whitespace-normal w-full">{comp.title}</h4>
                             <Badge
                               variant="outline"
                               className="text-xs font-bold border-2 border-cyan-400 text-cyan-600"
                             >
-                              🏆 Rank #{index}
+                              🏆 Rank #{comp.position}
                             </Badge>
                           </div>
-
-                          <div className="space-y-3">
-                            <div>
-                              <Label className="text-xs font-black text-gray-700 uppercase tracking-wide">
-                                🎯 TITLE
-                              </Label>
-                              <p className="text-xs mt-1 p-3 bg-white rounded-xl border-2 border-cyan-200 font-medium">
-                                Premium {listingData.heroKeyword} - Ultimate Noise Cancelling Over Ear with Mic, 30H
-                                Battery Life 🔥
-                              </p>
-                            </div>
-
-                            <div>
-                              <Label className="text-xs font-black text-gray-700 uppercase tracking-wide">
-                                💥 TOP BULLETS
-                              </Label>
-                              <div className="mt-1 space-y-1">
-                                <p className="text-xs p-2 bg-white rounded-lg border-2 border-cyan-200 font-medium">
-                                  • 🎵 Advanced noise cancellation blocks 95% ambient noise
-                                </p>
-                                <p className="text-xs p-2 bg-white rounded-lg border-2 border-cyan-200 font-medium">
-                                  • ⚡ 30-hour battery + 5min quick charge = 2hrs play
-                                </p>
-                              </div>
-                            </div>
+                          <div className="flex items-center gap-4 text-xs text-gray-700 font-medium">
+                            <span>Reviews: <span className="font-black">{comp.reviews_count}</span></span>
+                            <span>Rating: <span className="font-black">{comp.rating?.toFixed(1) ?? "-"}</span> ⭐</span>
                           </div>
                         </div>
                       ))}
@@ -914,77 +1034,43 @@ export default function ListingLiftAI() {
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                   <div className="space-y-3">
-                    <Label htmlFor="edit-title" className="text-sm font-black text-gray-800 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-green-500" />
-                      Product Title
-                    </Label>
-                    <Textarea
-                      id="edit-title"
-                      rows={3}
-                      placeholder="Make it pop! Front-load your keyword and add some spice... 🌶️"
-                      value={listingData.title}
-                      onChange={(e) => setListingData((prev) => ({ ...prev, title: e.target.value }))}
-                      className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium"
-                    />
-                    <div className="flex justify-between items-center">
-                      <p className="text-xs text-gray-600 font-medium">{listingData.title.length}/200 characters</p>
-                      <div className="flex gap-1">
-                        {listingData.title.length > 150 && <span className="text-orange-500">⚠️</span>}
-                        {listingData.title.length > 180 && <span className="text-red-500">🚨</span>}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
                     <Label className="text-sm font-black text-gray-800 flex items-center gap-2">
-                      <Fire className="w-4 h-4 text-red-500" />
-                      Bullet Points
+                      <Sparkles className="w-4 h-4 text-green-500" />
+                      Product Titles
                     </Label>
-                    {listingData.bulletPoints.map((point, index) => (
-                      <div key={index} className="space-y-2">
+                    {titles.map((title, idx) => (
+                      <div key={idx} className="flex items-center gap-2 mb-2">
                         <Textarea
-                          rows={2}
-                          placeholder={`Bullet ${index + 1}: Lead with benefits, add emojis, make it irresistible! 💯`}
-                          value={point}
-                          onChange={(e) => updateBulletPoint(index, e.target.value)}
-                          className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium"
+                          rows={5}
+                          placeholder="Make it pop! Front-load your keyword and add some spice... 🌶️"
+                          value={title}
+                          onChange={e => updateTitle(idx, e.target.value)}
+                          className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium flex-1"
                         />
-                        <div className="flex justify-between items-center">
-                          <p className="text-xs text-gray-600 font-medium">{point.length}/255 characters</p>
-                          <div className="flex gap-1">
-                            {point.length > 200 && <span className="text-orange-500">⚠️</span>}
-                            {point.length > 230 && <span className="text-red-500">🚨</span>}
-                          </div>
-                        </div>
+                        {titles.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => removeTitle(idx)}
+                            className="ml-2 scale-50 p-1 h-6 w-6 min-w-0 min-h-0 flex items-center justify-center"
+                            aria-label="Remove title"
+                          >
+                            –
+                          </Button>
+                        )}
                       </div>
                     ))}
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label
-                      htmlFor="edit-description"
-                      className="text-sm font-black text-gray-800 flex items-center gap-2"
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addTitle}
+                      className="mt-2"
+                      aria-label="Add another title"
                     >
-                      <Rocket className="w-4 h-4 text-purple-500" />
-                      Product Description
-                    </Label>
-                    <Textarea
-                      id="edit-description"
-                      rows={6}
-                      placeholder="Hook them in the first line, add social proof, create urgency. Make it scannable! 📱"
-                      value={listingData.description}
-                      onChange={(e) => setListingData((prev) => ({ ...prev, description: e.target.value }))}
-                      className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium"
-                    />
-                    <div className="flex justify-between items-center">
-                      <p className="text-xs text-gray-600 font-medium">
-                        {listingData.description.length}/2000 characters
-                      </p>
-                      <div className="flex gap-1">
-                        {listingData.description.length > 1500 && <span className="text-orange-500">⚠️</span>}
-                        {listingData.description.length > 1800 && <span className="text-red-500">🚨</span>}
-                      </div>
-                    </div>
+                      + Add Another Title
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
