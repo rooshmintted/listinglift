@@ -1,64 +1,83 @@
 /**
  * OptimizeNav Component
  *
- * Displays a navigation bar for the Optimize section with three unclickable elements:
- * - Title (active/selected)
- * - Bullet Points (disabled)
- * - Description (disabled)
+ * Displays a navigation bar for the Optimize section with three steps:
+ * - Title
+ * - Bullet Points
+ * - Description
  *
- * This component is purely presentational and matches the current colorful, rounded theme.
- * Only the 'Title' tab is visually active; others are faded and unclickable.
+ * Allows step-by-step navigation: users can only advance to the next step after completing the current one,
+ * but can always go back to previous steps. Locked steps show a tooltip.
  *
- * Usage: Place directly under the Optimize button/section.
+ * @param {Object} props
+ * @param {"title"|"bullet"|"description"} props.step - The current step
+ * @param {Array<"title"|"bullet"|"description">} props.completedSteps - Steps the user has completed
+ * @param {(step: "title"|"bullet"|"description") => void} props.onStepChange - Callback when a step is clicked
  */
 import React from "react"
 
 /**
  * Renders the Optimize navigation bar with three steps.
- * All steps are unclickable; only the selected tab is active.
+ * Allows navigation to completed or current steps; disables locked steps.
  */
 interface OptimizeNavProps {
-  selected?: "Title" | "Bullet Points" | "Description"
+  step: "title" | "bullet" | "description"
+  completedSteps: Array<"title" | "bullet" | "description">
+  onStepChange: (step: "title" | "bullet" | "description") => void
 }
-const OptimizeNav: React.FC<OptimizeNavProps> = ({ selected = "Title" }) => {
+const steps: Array<{ key: "title" | "bullet" | "description"; label: string }> = [
+  { key: "title", label: "Title" },
+  { key: "bullet", label: "Bullet Points" },
+  { key: "description", label: "Description" },
+]
+
+function isStepAvailable(step: "title" | "bullet" | "description", completed: Array<string>) {
+  // Step is available if it is completed, or if all previous steps are completed (for the next step)
+  const stepIdx = steps.findIndex(s => s.key === step)
+  if (completed.includes(step)) return true
+  // For the first incomplete step, allow only if all previous steps are completed
+  if (stepIdx === 0) return true
+  const allPrevCompleted = steps.slice(0, stepIdx).every(s => completed.includes(s.key))
+  return allPrevCompleted
+}
+
+const OptimizeNav: React.FC<OptimizeNavProps> = ({ step, completedSteps, onStepChange }) => {
   return (
     <nav className="w-full flex justify-center mt-4">
       <ul className="flex gap-4 bg-white/60 rounded-full px-2 py-1 shadow-md">
-        <li>
-          <span
-            className={
-              selected === "Title"
-                ? "px-6 py-2 rounded-full font-semibold bg-gradient-to-r from-orange-400 to-pink-500 text-white shadow transition-all"
-                : "px-6 py-2 rounded-full font-semibold text-gray-400 bg-gray-100 cursor-not-allowed opacity-60 select-none"
-            }
-          >
-            Title
-          </span>
-        </li>
-        <li>
-          <span
-            className={
-              selected === "Bullet Points"
-                ? "px-6 py-2 rounded-full font-semibold bg-gradient-to-r from-orange-400 to-pink-500 text-white shadow transition-all"
-                : "px-6 py-2 rounded-full font-semibold text-gray-400 bg-gray-100 cursor-not-allowed opacity-60 select-none"
-            }
-            aria-disabled={selected !== "Bullet Points"}
-          >
-            Bullet Points
-          </span>
-        </li>
-        <li>
-          <span
-            className={
-              selected === "Description"
-                ? "px-6 py-2 rounded-full font-semibold bg-gradient-to-r from-orange-400 to-pink-500 text-white shadow transition-all"
-                : "px-6 py-2 rounded-full font-semibold text-gray-400 bg-gray-100 cursor-not-allowed opacity-60 select-none"
-            }
-            aria-disabled={selected !== "Description"}
-          >
-            Description
-          </span>
-        </li>
+        {steps.map((s, idx) => {
+          const isActive = step === s.key
+          const isCompleted = completedSteps.includes(s.key)
+          const available = isStepAvailable(s.key, completedSteps)
+          return (
+            <li key={s.key}>
+              <button
+                type="button"
+                className={
+                  isActive
+                    ? "px-6 py-2 rounded-full font-semibold bg-gradient-to-r from-orange-400 to-pink-500 text-white shadow transition-all"
+                    : available
+                    ? "px-6 py-2 rounded-full font-semibold text-gray-700 bg-white hover:bg-orange-100 cursor-pointer transition-all"
+                    : "px-6 py-2 rounded-full font-semibold text-gray-400 bg-gray-100 cursor-not-allowed opacity-60 select-none relative group"
+                }
+                onClick={() => available && onStepChange(s.key)}
+                disabled={!available}
+                aria-current={isActive ? "step" : undefined}
+                aria-disabled={!available}
+              >
+                {s.label}
+                {!available && (
+                  <span className="absolute left-1/2 -translate-x-1/2 bottom-[-2.2rem] bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    Complete previous step to unlock
+                  </span>
+                )}
+                {isCompleted && !isActive && (
+                  <span className="ml-2 text-green-500 font-bold">✓</span>
+                )}
+              </button>
+            </li>
+          )
+        })}
       </ul>
     </nav>
   )

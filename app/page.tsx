@@ -191,8 +191,6 @@ export default function ListingLiftAI() {
   const [lastCopiedIdeaIdx, setLastCopiedIdeaIdx] = useState<number | null>(null)
   const [lastAcceptedIdeaIdx, setLastAcceptedIdeaIdx] = useState<number | null>(null)
 
-  const [bulletPointMode, setBulletPointMode] = useState(false)
-
   const [chosenBulletIdxs, setChosenBulletIdxs] = useState<number[]>([])
 
   const [descriptionMode, setDescriptionMode] = useState(false)
@@ -205,6 +203,10 @@ export default function ListingLiftAI() {
   const [previewMode, setPreviewMode] = useState(false)
 
   const [copiedField, setCopiedField] = useState<string | null>(null)
+
+  // Add at the top of the component, after useState declarations
+  const [optimizeStep, setOptimizeStep] = useState<"title" | "bullet" | "description">("title")
+  const [completedSteps, setCompletedSteps] = useState<Array<"title" | "bullet" | "description">>([])
 
   // When gptSuggestions changes, update visibleGptSuggestions
   useEffect(() => {
@@ -498,11 +500,31 @@ export default function ListingLiftAI() {
     }
   }, [activeTab, lastAnalyzed])
 
+  // Utility to add a step to completedSteps only if not already present
+  function markStepCompleted(step: "title" | "bullet" | "description") {
+    setCompletedSteps(prev => prev.includes(step) ? prev : [...prev, step])
+  }
+
   // Handler for choosing a title
   function handleChooseTitle(idx: number) {
     setChosenTitleIdx(idx)
     setHasChosenTitleThisSession(true)
+    markStepCompleted("title")
   }
+
+  // When 5 bullets are chosen, mark bullet as completed
+  useEffect(() => {
+    if (chosenBulletIdxs.length === 5) {
+      markStepCompleted("bullet")
+    }
+  }, [chosenBulletIdxs])
+
+  // When a description is chosen, mark description as completed
+  useEffect(() => {
+    if (chosenDescriptionIdx !== null) {
+      markStepCompleted("description")
+    }
+  }, [chosenDescriptionIdx])
 
   // Show loading spinner while checking auth
   if (loading) {
@@ -986,17 +1008,17 @@ export default function ListingLiftAI() {
                       Try loading sample data to see how it works!
                     </div>
                   )}
-                  {activeTab === "optimize" && !bulletPointMode && !descriptionMode && (
+                  {activeTab === "optimize" && optimizeStep === "title" && (
                     <div className="text-orange-50 font-medium text-md">
                       Review your current title and explore AI-powered suggestions. Move through each section to optimize your listing.
                     </div>
                   )}
-                  {activeTab === "optimize" && bulletPointMode && (
+                  {activeTab === "optimize" && optimizeStep === "bullet" && (
                     <div className="text-orange-50 font-medium text-md">
                       Choose 5 bullet points. Use AI suggestions or competitor examples to make each one count.
                     </div>
                   )}
-                  {activeTab === "optimize" && descriptionMode && (
+                  {activeTab === "optimize" && optimizeStep === "description" && (
                     <div className="text-orange-50 font-medium text-md">
                       Craft your product description with help from AI and competitor examples. Pick your favorite or combine ideas.
                     </div>
@@ -1132,7 +1154,20 @@ export default function ListingLiftAI() {
           </TabsList>
           {/* Show OptimizeNav only when Optimize tab is active */}
           {activeTab === "optimize" && (
-            <OptimizeNav selected={descriptionMode ? "Description" : bulletPointMode ? "Bullet Points" : "Title"} />
+            <OptimizeNav
+              step={optimizeStep}
+              completedSteps={completedSteps}
+              onStepChange={step => {
+                // Only allow going to a step if all previous steps are completed
+                if (
+                  (step === "title") ||
+                  (step === "bullet" && completedSteps.includes("title")) ||
+                  (step === "description" && completedSteps.includes("title") && completedSteps.includes("bullet"))
+                ) {
+                  setOptimizeStep(step)
+                }
+              }}
+            />
           )}
 
           <TabsContent value="input" className="space-y-6">
@@ -1217,7 +1252,7 @@ export default function ListingLiftAI() {
           </TabsContent>
 
           <TabsContent value="optimize" className="space-y-6">
-            {descriptionMode ? (
+            {optimizeStep === "description" ? (
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Column 1: Your Description(s) */}
                 <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
@@ -1373,7 +1408,7 @@ export default function ListingLiftAI() {
                   </CardContent>
                 </Card>
               </div>
-            ) : bulletPointMode ? (
+            ) : optimizeStep === "bullet" ? (
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Column 1: Current Bullet Points */}
                 <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
@@ -1446,11 +1481,12 @@ export default function ListingLiftAI() {
                       <Button type="button" size="sm" variant="outline" className="border-green-400 text-green-700" onClick={() => setListingData(prev => ({ ...prev, bulletPoints: [...prev.bulletPoints, ""] }))}>
                         + Add Bullet Point
                       </Button>
-                      {!descriptionMode && (
+                      {optimizeStep === "bullet" && (
                         <Button
                           type="button"
                           className="bg-green-500 text-white font-bold rounded-xl mt-4 w-full"
-                          onClick={() => { setDescriptionMode(true); setBulletPointMode(false); }}
+                          onClick={() => setOptimizeStep("description")}
+                          disabled={chosenBulletIdxs.length !== 5}
                         >
                           Next Step: Description
                         </Button>
@@ -1682,8 +1718,8 @@ export default function ListingLiftAI() {
                                 .then(data => setBulletGapResult(data))
                                 .catch(err => setBulletGapError(err.message || "Failed to get bullet gap analysis."))
                                 .finally(() => setBulletGapLoading(false))
-                              setBulletPointMode(true)
-                              setDescriptionMode(false)
+                              markStepCompleted("bullet")
+                              setOptimizeStep("bullet")
                             } catch (err: any) {
                               setBulletError(err.message || "Failed to fetch bullet points.")
                             } finally {
