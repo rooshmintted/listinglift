@@ -977,46 +977,34 @@ export default function ListingLiftAI() {
                 )}
               </div>
               <div className="mt-6 border-t border-orange-200 pt-4">
-                <h2 className="text-lg font-black text-orange-100 mb-2">Quick Actions ⚡</h2>
-                <div className="flex flex-wrap gap-3 mb-4">
+                <h2 className="text-lg font-black text-orange-100 mb-2">Quick Start Guide ⚡</h2>
+                {/* Step-by-step instructional copy instead of buttons */}
+                <div className="mb-4">
                   {activeTab === "input" && (
-                    <>
-                      <Button
-                        className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl border-2 border-blue-400 text-sm"
-                        onClick={handleLoadSampleData}
-                      >
-                        <Target className="w-4 h-4 mr-2" />
-                        Load Sample Data
-                      </Button>
-                      <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold rounded-xl border-2 border-green-400 text-sm">
-                        <Rocket className="w-4 h-4 mr-2" />
-                        Quick Start Guide
-                      </Button>
-                    </>
+                    <div className="text-orange-50 font-medium text-md">
+                      Enter your product's ASIN and hero keyword to get started. We'll analyze your listing and competitors.<br />
+                      Try loading sample data to see how it works!
+                    </div>
                   )}
-                  {activeTab === "optimize" && (
-                    <>
-                      <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold rounded-xl border-2 border-yellow-400 text-sm">
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Apply All Suggestions
-                      </Button>
-                      <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl border-2 border-purple-400 text-sm">
-                        <Star className="w-4 h-4 mr-2" />
-                        Save Progress
-                      </Button>
-                    </>
+                  {activeTab === "optimize" && !bulletPointMode && !descriptionMode && (
+                    <div className="text-orange-50 font-medium text-md">
+                      Review your current title and explore AI-powered suggestions. Move through each section to optimize your listing.
+                    </div>
+                  )}
+                  {activeTab === "optimize" && bulletPointMode && (
+                    <div className="text-orange-50 font-medium text-md">
+                      Choose 5 bullet points. Use AI suggestions or competitor examples to make each one count.
+                    </div>
+                  )}
+                  {activeTab === "optimize" && descriptionMode && (
+                    <div className="text-orange-50 font-medium text-md">
+                      Craft your product description with help from AI and competitor examples. Pick your favorite or combine ideas.
+                    </div>
                   )}
                   {activeTab === "preview" && (
-                    <>
-                      <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold rounded-xl border-2 border-green-400 text-sm">
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Export Listing
-                      </Button>
-                      <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl border-2 border-blue-400 text-sm">
-                        <TrendingUp className="w-4 h-4 mr-2" />
-                        Performance Score
-                      </Button>
-                    </>
+                    <div className="text-orange-50 font-medium text-md">
+                      Here's how your optimized listing will appear. Copy your final listing attributes over to Seller Central for upload.
+                    </div>
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -1155,7 +1143,7 @@ export default function ListingLiftAI() {
                   Let's Get This Bread! 🍞
                 </CardTitle>
                 <CardDescription className="text-orange-100 text-lg font-medium">
-                  Just drop your ASIN and hero keyword - we'll handle the rest like the legends we are ✨
+                  Just drop your ASIN and hero keyword - we'll handle the rest ✨
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-8 space-y-8">
