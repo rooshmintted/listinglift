@@ -599,7 +599,7 @@ export default function ListingLiftAI() {
                 <Fire className="w-8 h-8 text-red-500" />
               </div>
               <p className="text-xl text-gray-700 max-w-3xl mx-auto font-bold mb-8">
-                AI-powered Amazon optimization that actually gets Gen Z shoppers to click "Add to Cart" 🛒✨
+                AI-powered Amazon optimization that actually gets shoppers to click "Add to Cart" 🛒✨
               </p>
 
               <div className="flex gap-4 justify-center">
@@ -627,8 +627,8 @@ export default function ListingLiftAI() {
           {/* Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
             {[
-              { icon: TrendingUp, stat: "347%", label: "Avg Conversion Boost", color: "from-green-500 to-emerald-500" },
-              { icon: DollarSign, stat: "$2.3M+", label: "Revenue Generated", color: "from-yellow-500 to-orange-500" },
+              { icon: TrendingUp, stat: "7%", label: "Avg Conversion Boost", color: "from-green-500 to-emerald-500" },
+              { icon: DollarSign, stat: "$1.3M+", label: "Revenue Generated", color: "from-yellow-500 to-orange-500" },
               { icon: Users, stat: "12K+", label: "Happy Sellers", color: "from-blue-500 to-cyan-500" },
               { icon: Star, stat: "4.9/5", label: "User Rating", color: "from-purple-500 to-pink-500" },
             ].map((item, index) => (
@@ -662,7 +662,7 @@ export default function ListingLiftAI() {
                 icon: Zap,
                 title: "AI That Actually Gets It 🤖",
                 description:
-                  "Our AI speaks Gen Z and knows what makes people click 'buy now' instead of scrolling past",
+                  "Our AI speaks Amazon and knows what makes people click 'buy now' instead of scrolling past",
                 color: "from-orange-500 to-red-500",
                 borderColor: "border-orange-400",
               },
@@ -1063,6 +1063,7 @@ export default function ListingLiftAI() {
                   {activeTab === "input" && (
                     <div className="text-orange-50 font-medium text-md">
                       Enter your product's ASIN and hero keyword to get started. We'll analyze your listing and competitors.<br />
+                      <br />
                       Try loading sample data to see how it works!
                     </div>
                   )}
@@ -1095,77 +1096,104 @@ export default function ListingLiftAI() {
                 <BarChart3 className="w-6 h-6 text-orange-400" />
                 Keywords
               </h2>
-              <div className="absolute top-6 right-6">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-blue-400 text-blue-700 font-bold px-4 py-2 rounded-xl shadow"
-                  onClick={() => setShouldAnalyzeKeywords(true)}
-                  disabled={keywordGapLoading}
-                  aria-label="Re-analyze Keywords"
-                >
-                  {keywordGapLoading ? (
-                    <span className="flex items-center gap-2"><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></span>Analyzing...</span>
-                  ) : (
-                    <>Re-analyze</>
-                  )}
-                </Button>
-              </div>
-              <div className="flex-1">
-                {keywordGapLoading && <div className="text-blue-600 font-bold">Analyzing keyword gaps...</div>}
-                {keywordGapError && <div className="text-red-600 font-bold">{keywordGapError}</div>}
-                {keywordGapResult && (
-                  <div className="space-y-4">
-                    {/* High Value Gaps */}
-                    <div>
-                      <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
-                        <Badge className="bg-blue-600 text-white text-xs font-black border-2 border-blue-900">High Value Gaps</Badge>
-                        <span className="text-xs text-blue-900">(Add these to your title!)</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {(keywordGapResult.high_value_gaps || []).length > 0 ? (
-                          keywordGapResult.high_value_gaps.map((kw: string) => (
-                            <Badge key={kw} className="bg-blue-100 text-blue-800 border-blue-300 font-bold text-xs">{kw}</Badge>
-                          ))
-                        ) : (
-                          <span className="text-xs text-gray-500">No high value gaps found.</span>
-                        )}
-                      </div>
-                    </div>
-                    {/* Missing Keywords */}
-                    <div>
-                      <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
-                        <Badge className="bg-cyan-600 text-white text-xs font-black border-2 border-cyan-900">Missing Keywords</Badge>
-                        <span className="text-xs text-cyan-900">(From competitors, not in your title)</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {(keywordGapResult.missing_keywords || []).length > 0 ? (
-                          keywordGapResult.missing_keywords.map((kw: any, i: number) => (
-                            <Badge key={kw.keyword + i} className="bg-cyan-100 text-cyan-800 border-cyan-300 font-bold text-xs">{kw.keyword}</Badge>
-                          ))
-                        ) : (
-                          <span className="text-xs text-gray-500">No missing keywords found.</span>
-                        )}
-                      </div>
-                    </div>
-                    {/* Our Existing Keywords */}
-                    <div>
-                      <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
-                        <Badge className="bg-green-600 text-white text-xs font-black border-2 border-green-900">Your Title Keywords</Badge>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {(keywordGapResult.our_existing_keywords || []).length > 0 ? (
-                          keywordGapResult.our_existing_keywords.map((kw: string) => (
-                            <Badge key={kw} className="bg-green-100 text-green-800 border-green-300 font-bold text-xs">{kw}</Badge>
-                          ))
-                        ) : (
-                          <span className="text-xs text-gray-500">No keywords found in your title.</span>
-                        )}
-                      </div>
-                    </div>
+              {activeTab === "input" ? (
+                <div className="flex flex-col gap-4 p-4 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl border-2 border-orange-100 shadow-inner">
+                  <div className="text-lg font-bold text-orange-700">
+                    Our AI analyzes your product and your top competitors to uncover the exact keywords and phrases that drive clicks and sales on Amazon.
                   </div>
-                )}
-              </div>
+                  <div className="text-md text-orange-800">
+                    We don't just guess—we use real data and advanced language models to identify what's missing, what's working, and what can set your listing apart.
+                  </div>
+                  <ul className="list-disc list-inside text-orange-900 font-medium space-y-1 pl-2">
+                    <li>
+                      <span className="font-bold">A breakdown of high-value keywords</span> your listing should target
+                    </li>
+                    <li>
+                      <span className="font-bold">Actionable, AI-powered suggestions</span> to boost your visibility and conversion rate
+                    </li>
+                    <li>
+                      <span className="font-bold">Your top 10 strongest competitors' listing data</span>
+                    </li>
+                  </ul>
+                  <div className="text-md text-orange-700 font-semibold mt-2">
+                    Let our AI do the heavy lifting—so you can focus on growing your business!
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="absolute top-6 right-6">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-blue-400 text-blue-700 font-bold px-4 py-2 rounded-xl shadow"
+                      onClick={() => setShouldAnalyzeKeywords(true)}
+                      disabled={keywordGapLoading}
+                      aria-label="Re-analyze Keywords"
+                    >
+                      {keywordGapLoading ? (
+                        <span className="flex items-center gap-2"><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></span>Analyzing...</span>
+                      ) : (
+                        <>Re-analyze</>
+                      )}
+                    </Button>
+                  </div>
+                  <div className="flex-1">
+                    {keywordGapLoading && <div className="text-blue-600 font-bold">Analyzing keyword gaps...</div>}
+                    {keywordGapError && <div className="text-red-600 font-bold">{keywordGapError}</div>}
+                    {keywordGapResult && (
+                      <div className="space-y-4">
+                        {/* High Value Gaps */}
+                        <div>
+                          <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
+                            <Badge className="bg-blue-600 text-white text-xs font-black border-2 border-blue-900">High Value Gaps</Badge>
+                            <span className="text-xs text-blue-900">(Add these to your title!)</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {(keywordGapResult.high_value_gaps || []).length > 0 ? (
+                              keywordGapResult.high_value_gaps.map((kw: string) => (
+                                <Badge key={kw} className="bg-blue-100 text-blue-800 border-blue-300 font-bold text-xs">{kw}</Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-gray-500">No high value gaps found.</span>
+                            )}
+                          </div>
+                        </div>
+                        {/* Missing Keywords */}
+                        <div>
+                          <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
+                            <Badge className="bg-cyan-600 text-white text-xs font-black border-2 border-cyan-900">Missing Keywords</Badge>
+                            <span className="text-xs text-cyan-900">(From competitors, not in your title)</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {(keywordGapResult.missing_keywords || []).length > 0 ? (
+                              keywordGapResult.missing_keywords.map((kw: any, i: number) => (
+                                <Badge key={kw.keyword + i} className="bg-cyan-100 text-cyan-800 border-cyan-300 font-bold text-xs">{kw.keyword}</Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-gray-500">No missing keywords found.</span>
+                            )}
+                          </div>
+                        </div>
+                        {/* Our Existing Keywords */}
+                        <div>
+                          <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
+                            <Badge className="bg-green-600 text-white text-xs font-black border-2 border-green-900">Your Title Keywords</Badge>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {(keywordGapResult.our_existing_keywords || []).length > 0 ? (
+                              keywordGapResult.our_existing_keywords.map((kw: string) => (
+                                <Badge key={kw} className="bg-green-100 text-green-800 border-green-300 font-bold text-xs">{kw}</Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-gray-500">No keywords found in your title.</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
