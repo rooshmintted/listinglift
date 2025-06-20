@@ -195,6 +195,17 @@ export default function ListingLiftAI() {
 
   const [chosenBulletIdxs, setChosenBulletIdxs] = useState<number[]>([])
 
+  const [descriptionMode, setDescriptionMode] = useState(false)
+  const [descriptionDraft, setDescriptionDraft] = useState(listingData.description || "")
+  const [descriptionIdeas, setDescriptionIdeas] = useState<string[] | null>(null)
+  const [descriptionIdeasLoading, setDescriptionIdeasLoading] = useState(false)
+  const [descriptionIdeasError, setDescriptionIdeasError] = useState("")
+  const [descriptionDrafts, setDescriptionDrafts] = useState<string[]>(listingData.description ? [listingData.description] : [""])
+  const [chosenDescriptionIdx, setChosenDescriptionIdx] = useState<number | null>(null)
+  const [previewMode, setPreviewMode] = useState(false)
+
+  const [copiedField, setCopiedField] = useState<string | null>(null)
+
   // When gptSuggestions changes, update visibleGptSuggestions
   useEffect(() => {
     setVisibleGptSuggestions(gptSuggestions)
@@ -673,9 +684,20 @@ export default function ListingLiftAI() {
                 <Button
                   onClick={() => setCurrentPage("signup")}
                   className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-2xl px-12 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-orange-400"
+                  size="lg"
+                  disabled={!listingData.asin || !listingData.heroKeyword || isAnalyzing}
                 >
-                  <Fire className="w-6 h-6 mr-3" />
-                  Let's Gooo! 🚀
+                  {isAnalyzing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3"></div>
+                      AI is cooking... 🔥
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-6 h-6 mr-3" />
+                      Generate AI Magic ✨
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -1122,7 +1144,7 @@ export default function ListingLiftAI() {
           </TabsList>
           {/* Show OptimizeNav only when Optimize tab is active */}
           {activeTab === "optimize" && (
-            <OptimizeNav selected={bulletPointMode ? "Bullet Points" : "Title"} />
+            <OptimizeNav selected={descriptionMode ? "Description" : bulletPointMode ? "Bullet Points" : "Title"} />
           )}
 
           <TabsContent value="input" className="space-y-6">
@@ -1207,9 +1229,351 @@ export default function ListingLiftAI() {
           </TabsContent>
 
           <TabsContent value="optimize" className="space-y-6">
-            {/* Debug message for bulletPointMode */}
-            <div className="text-xs text-gray-500 font-mono mb-2">[DEBUG] bulletPointMode: {String(bulletPointMode)}</div>
-            {!bulletPointMode ? (
+            {descriptionMode ? (
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Column 1: Your Description(s) */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
+                    <CardTitle className="text-xl font-black">Your Description</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    {descriptionDrafts.map((desc, idx) => (
+                      <div key={idx} className={`flex flex-col gap-1 mb-4 border-2 rounded-xl ${chosenDescriptionIdx === idx ? 'border-green-500 bg-green-50' : 'border-green-300 bg-white'}`}>
+                        <Textarea
+                          rows={10}
+                          value={desc}
+                          onChange={e => setDescriptionDrafts(prev => prev.map((d, i) => i === idx ? e.target.value : d))}
+                          className="rounded-xl flex-1 bg-transparent"
+                          placeholder={`Description ${idx + 1}`}
+                        />
+                        <div className="flex gap-2 mt-1 justify-end">
+                          <Button
+                            type="button"
+                            size="sm"
+                            className={`font-bold border-2 rounded-xl ${chosenDescriptionIdx === idx ? 'bg-green-500 text-white border-green-700' : 'bg-green-100 text-green-700 border-green-400'}`}
+                            onClick={() => setChosenDescriptionIdx(idx)}
+                          >
+                            ^ Choose Description
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="font-bold border-2 border-red-400 text-red-700 rounded-xl bg-white hover:bg-red-50"
+                            onClick={() => {
+                              setDescriptionDrafts(prev => prev.filter((_, i) => i !== idx))
+                              if (chosenDescriptionIdx === idx) setChosenDescriptionIdx(null)
+                              else if (chosenDescriptionIdx && chosenDescriptionIdx > idx) setChosenDescriptionIdx(chosenDescriptionIdx - 1)
+                            }}
+                            aria-label="Delete description"
+                          >
+                            ^ Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="border-green-400 text-green-700"
+                      onClick={() => setDescriptionDrafts(prev => [...prev, ""])}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      type="button"
+                      className="bg-green-500 text-white font-bold rounded-xl mt-4 w-full"
+                      onClick={() => { setPreviewMode(true); setActiveTab('preview'); }}
+                    >
+                      Next Step: Preview
+                    </Button>
+                  </CardContent>
+                </Card>
+                {/* Column 2: AI Description Suggestions */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-yellow-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
+                    <CardTitle className="flex items-center gap-2 text-xl font-black">
+                      <Lightbulb className="w-6 h-6" />
+                      AI Description Suggestions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-4">
+                    <Button
+                      type="button"
+                      className="font-bold border-2 rounded-xl bg-purple-100 text-purple-700 border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+                      onClick={async () => {
+                        setDescriptionIdeasLoading(true)
+                        setDescriptionIdeasError("")
+                        setDescriptionIdeas(null)
+                        try {
+                          // Gather all competitor descriptions
+                          const competitorDescs = competitorDetails.map((c: any) => c.description || "").filter(Boolean)
+                          const res = await fetch("/api/gpt-suggest", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              "x-ll-ai-action": "description-ideas"
+                            },
+                            body: JSON.stringify({ competitorDescriptions: competitorDescs })
+                          })
+                          if (!res.ok) throw new Error(await res.text())
+                          const data = await res.json()
+                          setDescriptionIdeas(data)
+                        } catch (err: any) {
+                          setDescriptionIdeasError(err.message || "Failed to generate description ideas.")
+                        } finally {
+                          setDescriptionIdeasLoading(false)
+                        }
+                      }}
+                      disabled={descriptionIdeasLoading || competitorDetails.length === 0}
+                    >
+                      {descriptionIdeasLoading ? "Generating..." : "Generate AI Description Suggestions"}
+                    </Button>
+                    {descriptionIdeasError && <div className="text-xs text-red-600 font-bold mt-2">{descriptionIdeasError}</div>}
+                    {descriptionIdeas && (
+                      <div className="space-y-4">
+                        {descriptionIdeas.map((idea, idx) => (
+                          <div key={idx} className="border-3 border-blue-400 rounded-2xl p-4 space-y-2 bg-gradient-to-br from-blue-50 to-blue-200 shadow-lg flex flex-col">
+                            <div className="font-bold text-md text-gray-900 mb-2">{idea}</div>
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                className="bg-green-500 hover:bg-green-600 text-white font-bold border-2 border-green-700 rounded-xl shadow"
+                                onClick={() => {
+                                  setDescriptionDrafts(prev => [...prev, idea])
+                                  setChosenDescriptionIdx(descriptionDrafts.length)
+                                }}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-400 text-red-700 font-bold rounded-xl shadow"
+                                onClick={() => setDescriptionIdeas(prev => prev ? prev.filter((_, i) => i !== idx) : prev)}
+                              >
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+                {/* Column 3: Competitor Descriptions */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
+                    <CardTitle className="flex items-center gap-2 text-xl font-black">
+                      <Target className="w-6 h-6" />
+                      Competitor Descriptions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-4">
+                    {competitorDetails.map((comp, idx) => (
+                      <div key={comp.asin || idx} className="mb-4 border-2 border-cyan-200 rounded-xl p-3">
+                        <div className="font-bold text-cyan-800 mb-1">{comp.title || <span className="italic text-gray-400">No title</span>}</div>
+                        <div className="mb-1">
+                          <span className="font-bold text-cyan-600 text-xs">Description:</span>
+                          <div className="text-xs text-gray-700 bg-cyan-50 rounded px-2 py-1 border border-cyan-100 mt-1 whitespace-pre-wrap">
+                            {comp.description ? comp.description : <span className="text-gray-400 italic">No description found.</span>}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            ) : bulletPointMode ? (
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Column 1: Current Bullet Points */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 flex flex-row items-center justify-between">
+                    <CardTitle className="text-xl font-black">Your Bullet Points (Choose 5)</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    <div className="space-y-3">
+                      {listingData.bulletPoints.map((bp, idx) => {
+                        const isSelected = chosenBulletIdxs.includes(idx)
+                        const canSelectMore = isSelected || chosenBulletIdxs.length < 5
+                        return (
+                          <div
+                            key={idx}
+                            className={`flex flex-col gap-1 mb-4 border-2 rounded-xl ${isSelected ? 'border-green-500 bg-green-50' : 'border-green-300 bg-white'}`}
+                          >
+                            <Textarea
+                              rows={2}
+                              value={bp}
+                              onChange={e => setListingData(prev => {
+                                const newBullets = [...prev.bulletPoints]
+                                newBullets[idx] = e.target.value
+                                return { ...prev, bulletPoints: newBullets }
+                              })}
+                              className="rounded-xl flex-1 bg-transparent"
+                              placeholder={`Bullet Point ${idx + 1}`}
+                            />
+                            <div className="flex gap-2 mt-1 justify-end">
+                              <Button
+                                type="button"
+                                size="sm"
+                                className={`font-bold border-2 rounded-xl ${isSelected ? 'bg-green-500 text-white border-green-700' : 'bg-green-100 text-green-700 border-green-400'}`}
+                                onClick={() => {
+                                  setChosenBulletIdxs(prev => {
+                                    if (isSelected) {
+                                      return prev.filter(i => i !== idx)
+                                    } else if (prev.length < 5) {
+                                      return [...prev, idx]
+                                    } else {
+                                      return prev
+                                    }
+                                  })
+                                }}
+                                disabled={!canSelectMore}
+                              >
+                                ^ Choose Bullet
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="font-bold border-2 border-red-400 text-red-700 rounded-xl bg-white hover:bg-red-50"
+                                onClick={() => setListingData(prev => {
+                                  const newBullets = prev.bulletPoints.filter((_, i) => i !== idx)
+                                  // Update chosenBulletIdxs: remove idx, decrement indices > idx
+                                  setChosenBulletIdxs(chosen => chosen
+                                    .filter(i => i !== idx)
+                                    .map(i => (i > idx ? i - 1 : i))
+                                  )
+                                  return { ...prev, bulletPoints: newBullets }
+                                })}
+                                aria-label="Delete bullet point"
+                              >
+                                ^ Delete
+                              </Button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                      <Button type="button" size="sm" variant="outline" className="border-green-400 text-green-700" onClick={() => setListingData(prev => ({ ...prev, bulletPoints: [...prev.bulletPoints, ""] }))}>
+                        + Add Bullet Point
+                      </Button>
+                      {!descriptionMode && (
+                        <Button
+                          type="button"
+                          className="bg-green-500 text-white font-bold rounded-xl mt-4 w-full"
+                          onClick={() => { setDescriptionMode(true); setBulletPointMode(false); }}
+                        >
+                          Next Step: Description
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+                {/* Column 2: AI Suggestions & Gap Analysis */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-yellow-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
+                    <CardTitle className="flex items-center gap-2 text-xl font-black">
+                      <Lightbulb className="w-6 h-6" />
+                      AI Bullet Point Suggestions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-4">
+                    <Button
+                      type="button"
+                      className="font-bold border-2 rounded-xl bg-purple-100 text-purple-700 border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+                      onClick={async () => {
+                        setBulletIdeasLoading(true)
+                        setBulletIdeasError("")
+                        setBulletIdeas(null)
+                        try {
+                          // Gather all competitor bullet points (flattened)
+                          const allCompetitorBullets = competitorDetails.flatMap((c: any) => (c.bullet_points || "").split("\n").filter(Boolean))
+                          const res = await fetch("/api/gpt-suggest", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              "x-ll-ai-action": "bullet-ideas"
+                            },
+                            body: JSON.stringify({ competitorBullets: allCompetitorBullets })
+                          })
+                          if (!res.ok) throw new Error(await res.text())
+                          const data = await res.json()
+                          setBulletIdeas(data)
+                        } catch (err: any) {
+                          setBulletIdeasError(err.message || "Failed to generate bullet point ideas.")
+                        } finally {
+                          setBulletIdeasLoading(false)
+                        }
+                      }}
+                      disabled={bulletIdeasLoading || competitorDetails.length === 0}
+                    >
+                      {bulletIdeasLoading ? "Generating..." : "Generate AI Bullet Point Suggestions"}
+                    </Button>
+                    {bulletIdeasError && <div className="text-xs text-red-600 font-bold mt-2">{bulletIdeasError}</div>}
+                    {/* AI Bullet Point Ideas Cards */}
+                    {bulletIdeas && (
+                      <div className="space-y-4">
+                        {bulletIdeas.map((idea, idx) => (
+                          <div key={idx} className="border-3 border-blue-400 rounded-2xl p-4 space-y-2 bg-gradient-to-br from-blue-50 to-blue-200 shadow-lg flex flex-col">
+                            <div className="font-bold text-md text-gray-900 mb-2">{idea}</div>
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                className="bg-green-500 hover:bg-green-600 text-white font-bold border-2 border-green-700 rounded-xl shadow"
+                                onClick={() => {
+                                  setListingData(prev => ({ ...prev, bulletPoints: [...prev.bulletPoints, idea] }))
+                                  setBulletIdeas(prev => prev ? prev.filter((_, i) => i !== idx) : prev)
+                                }}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-400 text-red-700 font-bold rounded-xl shadow"
+                                onClick={() => setBulletIdeas(prev => prev ? prev.filter((_, i) => i !== idx) : prev)}
+                              >
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+                {/* Column 3: Competitor Bullet Points */}
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
+                    <CardTitle className="flex items-center gap-2 text-xl font-black">
+                      <Target className="w-6 h-6" />
+                      Competitor Bullet Points
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-4">
+                    {/* Show top 10 competitors' bullet points only (no description) */}
+                    {competitorDetails.map((comp, idx) => (
+                      <div key={comp.asin || idx} className="mb-4 border-2 border-cyan-200 rounded-xl p-3">
+                        <div className="font-bold text-cyan-800 mb-1">{comp.title || <span className="italic text-gray-400">No title</span>}</div>
+                        <div className="mb-1">
+                          <span className="font-bold text-cyan-600 text-xs">Bullet Points:</span>
+                          <ul className="ml-4 mt-1 space-y-1">
+                            {(comp.bullet_points || "").split("\n").filter(Boolean).length > 0 ? (
+                              (comp.bullet_points || "").split("\n").filter(Boolean).map((bp: string, i: number) => (
+                                <li key={i} className="text-xs text-gray-700 bg-cyan-50 rounded px-2 py-1 border border-cyan-100">• {bp}</li>
+                              ))
+                            ) : (
+                              <li className="text-xs text-gray-400 italic">No bullet points found.</li>
+                            )}
+                          </ul>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Editable Content - Left Column */}
                 <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
@@ -1330,14 +1694,13 @@ export default function ListingLiftAI() {
                                 .then(data => setBulletGapResult(data))
                                 .catch(err => setBulletGapError(err.message || "Failed to get bullet gap analysis."))
                                 .finally(() => setBulletGapLoading(false))
+                              setBulletPointMode(true)
+                              setDescriptionMode(false)
                             } catch (err: any) {
                               setBulletError(err.message || "Failed to fetch bullet points.")
                             } finally {
                               setBulletLoading(false)
                             }
-                            console.debug('[DEBUG] About to set bulletPointMode to true')
-                            setBulletPointMode(true)
-                            console.debug('[DEBUG] bulletPointMode should now be true')
                           }}
                         >
                           {bulletLoading ? "Loading..." : "Next Step: Optimize Bullet Points"}
@@ -1532,196 +1895,6 @@ export default function ListingLiftAI() {
                   </CardContent>
                 </Card>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                {/* Column 1: Current Bullet Points */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 flex flex-row items-center justify-between">
-                    <CardTitle className="text-xl font-black">Your Bullet Points</CardTitle>
-                    <Button type="button" size="sm" variant="outline" className="border-gray-400 text-gray-700" onClick={() => setBulletPointMode(false)}>
-                      ← Back to Title
-                    </Button>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-6">
-                    <div className="space-y-3">
-                      {listingData.bulletPoints.map((bp, idx) => {
-                        const isSelected = chosenBulletIdxs.includes(idx)
-                        const canSelectMore = isSelected || chosenBulletIdxs.length < 5
-                        return (
-                          <div
-                            key={idx}
-                            className={`flex flex-col gap-1 mb-4 border-2 rounded-xl ${isSelected ? 'border-green-500 bg-green-50' : 'border-green-300 bg-white'}`}
-                          >
-                            <Textarea
-                              rows={2}
-                              value={bp}
-                              onChange={e => setListingData(prev => {
-                                const newBullets = [...prev.bulletPoints]
-                                newBullets[idx] = e.target.value
-                                return { ...prev, bulletPoints: newBullets }
-                              })}
-                              className="rounded-xl flex-1 bg-transparent"
-                              placeholder={`Bullet Point ${idx + 1}`}
-                            />
-                            <div className="flex gap-2 mt-1 justify-end">
-                              <Button
-                                type="button"
-                                size="sm"
-                                className={`font-bold border-2 rounded-xl ${isSelected ? 'bg-green-500 text-white border-green-700' : 'bg-green-100 text-green-700 border-green-400'}`}
-                                onClick={() => {
-                                  setChosenBulletIdxs(prev => {
-                                    if (isSelected) {
-                                      return prev.filter(i => i !== idx)
-                                    } else if (prev.length < 5) {
-                                      return [...prev, idx]
-                                    } else {
-                                      return prev
-                                    }
-                                  })
-                                }}
-                                disabled={!canSelectMore}
-                              >
-                                ^ Choose Bullet
-                              </Button>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                className="font-bold border-2 border-red-400 text-red-700 rounded-xl bg-white hover:bg-red-50"
-                                onClick={() => setListingData(prev => {
-                                  const newBullets = prev.bulletPoints.filter((_, i) => i !== idx)
-                                  // Update chosenBulletIdxs: remove idx, decrement indices > idx
-                                  setChosenBulletIdxs(chosen => chosen
-                                    .filter(i => i !== idx)
-                                    .map(i => (i > idx ? i - 1 : i))
-                                  )
-                                  return { ...prev, bulletPoints: newBullets }
-                                })}
-                                aria-label="Delete bullet point"
-                              >
-                                ^ Delete
-                              </Button>
-                            </div>
-                          </div>
-                        )
-                      })}
-                      <Button type="button" size="sm" variant="outline" className="border-green-400 text-green-700" onClick={() => setListingData(prev => ({ ...prev, bulletPoints: [...prev.bulletPoints, ""] }))}>
-                        + Add Bullet Point
-                      </Button>
-                    </div>
-                    <Button type="button" className="bg-green-500 text-white font-bold rounded-xl mt-4">Save Bullet Points</Button>
-                  </CardContent>
-                </Card>
-                {/* Column 2: AI Suggestions & Gap Analysis */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-yellow-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
-                    <CardTitle className="flex items-center gap-2 text-xl font-black">
-                      <Lightbulb className="w-6 h-6" />
-                      AI Bullet Point Suggestions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    {/* Generate AI Bullet Point Suggestions Button */}
-                    <Button
-                      type="button"
-                      className="font-bold border-2 rounded-xl bg-purple-100 text-purple-700 border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
-                      onClick={async () => {
-                        setBulletIdeasLoading(true)
-                        setBulletIdeasError("")
-                        setBulletIdeas(null)
-                        try {
-                          // Gather all competitor bullet points (flattened)
-                          const allCompetitorBullets = competitorDetails.flatMap((c: any) => (c.bullet_points || "").split("\n").filter(Boolean))
-                          const res = await fetch("/api/gpt-suggest", {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                              "x-ll-ai-action": "bullet-ideas"
-                            },
-                            body: JSON.stringify({ competitorBullets: allCompetitorBullets })
-                          })
-                          if (!res.ok) throw new Error(await res.text())
-                          const data = await res.json()
-                          setBulletIdeas(data)
-                        } catch (err: any) {
-                          setBulletIdeasError(err.message || "Failed to generate bullet point ideas.")
-                        } finally {
-                          setBulletIdeasLoading(false)
-                        }
-                      }}
-                      disabled={bulletIdeasLoading || competitorDetails.length === 0}
-                    >
-                      {bulletIdeasLoading ? "Generating..." : "Generate AI Bullet Point Suggestions"}
-                    </Button>
-                    {bulletIdeasError && <div className="text-xs text-red-600 font-bold mt-2">{bulletIdeasError}</div>}
-                    {/* AI Bullet Point Ideas Cards */}
-                    {bulletIdeas && (
-                      <div className="space-y-4">
-                        {bulletIdeas.map((idea, idx) => (
-                          <div key={idx} className="border-3 border-blue-400 rounded-2xl p-4 space-y-2 bg-gradient-to-br from-blue-50 to-blue-200 shadow-lg flex flex-col">
-                            <div className="font-bold text-md text-gray-900 mb-2">{idea}</div>
-                            <div className="flex gap-2 mt-2">
-                              <Button
-                                size="sm"
-                                className="bg-green-500 hover:bg-green-600 text-white font-bold border-2 border-green-700 rounded-xl shadow"
-                                onClick={() => {
-                                  setListingData(prev => ({ ...prev, bulletPoints: [...prev.bulletPoints, idea] }))
-                                  setBulletIdeas(prev => prev ? prev.filter((_, i) => i !== idx) : prev)
-                                }}
-                              >
-                                Accept
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="border-red-400 text-red-700 font-bold rounded-xl shadow"
-                                onClick={() => setBulletIdeas(prev => prev ? prev.filter((_, i) => i !== idx) : prev)}
-                              >
-                                Reject
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-                {/* Column 3: Competitor Bullet Points */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
-                    <CardTitle className="flex items-center gap-2 text-xl font-black">
-                      <Target className="w-6 h-6" />
-                      Competitor Bullet Points
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    {/* Show top 10 competitors' bullet points and descriptions */}
-                    {competitorDetails.map((comp, idx) => (
-                      <div key={comp.asin || idx} className="mb-4 border-2 border-cyan-200 rounded-xl p-3">
-                        <div className="font-bold text-cyan-800 mb-1">{comp.title || <span className="italic text-gray-400">No title</span>}</div>
-                        <div className="mb-1">
-                          <span className="font-bold text-cyan-600 text-xs">Bullet Points:</span>
-                          <ul className="ml-4 mt-1 space-y-1">
-                            {(comp.bullet_points || "").split("\n").filter(Boolean).length > 0 ? (
-                              (comp.bullet_points || "").split("\n").filter(Boolean).map((bp: string, i: number) => (
-                                <li key={i} className="text-xs text-gray-700 bg-cyan-50 rounded px-2 py-1 border border-cyan-100">• {bp}</li>
-                              ))
-                            ) : (
-                              <li className="text-xs text-gray-400 italic">No bullet points found.</li>
-                            )}
-                          </ul>
-                        </div>
-                        <div>
-                          <span className="font-bold text-cyan-600 text-xs">Description:</span>
-                          <div className="text-xs text-gray-700 bg-cyan-50 rounded px-2 py-1 border border-cyan-100 mt-1 whitespace-pre-wrap">
-                            {comp.description ? comp.description : <span className="text-gray-400 italic">No description found.</span>}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
             )}
           </TabsContent>
 
@@ -1737,52 +1910,71 @@ export default function ListingLiftAI() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
-                <div className="bg-white border-4 border-purple-300 rounded-3xl p-8 space-y-6 shadow-xl">
-                  <div className="flex items-start gap-6">
-                    <div className="w-40 h-40 bg-gradient-to-br from-orange-200 to-pink-200 rounded-2xl flex items-center justify-center border-3 border-orange-300">
-                      <span className="text-gray-600 text-sm font-bold">Product Image</span>
-                    </div>
-                    <div className="flex-1 space-y-3">
-                      <h2 className="text-2xl font-bold text-blue-600 hover:underline cursor-pointer">
-                        {listingData.title || "Your Amazing Product Title Will Appear Here! 🚀"}
-                      </h2>
-                      <div className="flex items-center gap-3">
-                        <div className="flex text-yellow-400 text-xl">★★★★☆</div>
-                        <span className="text-sm text-gray-600 font-medium">4.2 out of 5 stars (1,234 reviews)</span>
-                      </div>
-                      <div className="text-3xl font-black text-red-600">$29.99</div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <h3 className="font-black text-lg">About this item</h3>
-                    <ul className="space-y-2">
-                      {listingData.bulletPoints
-                        .filter((point) => point.trim())
-                        .map((point, index) => (
-                          <li
-                            key={index}
-                            className="text-sm font-medium p-2 bg-gray-50 rounded-lg border-2 border-gray-200"
-                          >
-                            • {point}
+                {/* Title Preview */}
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-2xl font-bold text-blue-600">{titles[chosenTitleIdx ?? 0] || listingData.title || "No title chosen"}</h2>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="ml-2 border-blue-400 text-blue-700 font-bold rounded-xl"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(titles[chosenTitleIdx ?? 0] || listingData.title || "")
+                      setCopiedField('title')
+                      setTimeout(() => setCopiedField(null), 1200)
+                    }}
+                  >
+                    {copiedField === 'title' ? 'Copied!' : 'Copy'}
+                  </Button>
+                </div>
+                {/* Bullet Points Preview */}
+                <div className="space-y-2">
+                  <h3 className="font-black text-lg">About this item</h3>
+                  <ul className="space-y-2">
+                    {chosenBulletIdxs.length > 0
+                      ? chosenBulletIdxs.map((idx, i) => (
+                          <li key={i} className="flex items-center gap-2 text-sm font-medium p-2 bg-gray-50 rounded-lg border-2 border-gray-200">
+                            <span>• {listingData.bulletPoints[idx]}</span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="ml-2 border-green-400 text-green-700 font-bold rounded-xl"
+                              onClick={async () => {
+                                await navigator.clipboard.writeText(listingData.bulletPoints[idx] || "")
+                                setCopiedField('bullet-' + idx)
+                                setTimeout(() => setCopiedField(null), 1200)
+                              }}
+                            >
+                              {copiedField === 'bullet-' + idx ? 'Copied!' : 'Copy'}
+                            </Button>
                           </li>
-                        ))}
-                      {listingData.bulletPoints.filter((point) => point.trim()).length === 0 && (
-                        <li className="text-sm text-gray-500 font-medium p-2 bg-gray-50 rounded-lg border-2 border-gray-200">
-                          • Your amazing bullet points will appear here! ✨
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-
-                  {listingData.description && (
-                    <div className="space-y-3">
-                      <h3 className="font-black text-lg">Product Description</h3>
-                      <div className="text-sm whitespace-pre-wrap font-medium p-4 bg-gray-50 rounded-2xl border-2 border-gray-200">
-                        {listingData.description}
-                      </div>
+                        ))
+                      : <li className="text-sm text-gray-500 font-medium p-2 bg-gray-50 rounded-lg border-2 border-gray-200">No bullet points chosen.</li>}
+                  </ul>
+                </div>
+                {/* Description Preview */}
+                <div className="space-y-3">
+                  <h3 className="font-black text-lg">Product Description</h3>
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm whitespace-pre-wrap font-medium p-4 bg-gray-50 rounded-2xl border-2 border-gray-200 flex-1">
+                      {chosenDescriptionIdx !== null && descriptionDrafts[chosenDescriptionIdx]
+                        ? descriptionDrafts[chosenDescriptionIdx]
+                        : "No description chosen."}
                     </div>
-                  )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="ml-2 border-purple-400 text-purple-700 font-bold rounded-xl"
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(
+                          (chosenDescriptionIdx !== null && descriptionDrafts[chosenDescriptionIdx]) || ""
+                        )
+                        setCopiedField('description')
+                        setTimeout(() => setCopiedField(null), 1200)
+                      }}
+                    >
+                      {copiedField === 'description' ? 'Copied!' : 'Copy'}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

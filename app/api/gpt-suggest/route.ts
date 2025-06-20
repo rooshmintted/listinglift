@@ -221,12 +221,49 @@ async function POST_bullet_ideas(req: NextRequest) {
 }
 
 /**
+ * Description Suggestion API route.
+ * Accepts POST requests with { competitorDescriptions: string[] }.
+ * Calls OpenAI GPT-4o to generate 5 creative Amazon product descriptions based on competitor descriptions.
+ * Returns a JSON array of strings.
+ */
+async function POST_description_ideas(req: NextRequest) {
+  try {
+    const { competitorDescriptions } = await req.json()
+    if (!Array.isArray(competitorDescriptions)) {
+      return NextResponse.json({ error: "Missing competitorDescriptions" }, { status: 400 })
+    }
+    const prompt = `You are an expert Amazon listing copywriter. Given the product descriptions from top competitors, generate 5 creative, high-converting Amazon product descriptions for our product. Each idea should be 3-6 sentences, persuasive, and unique. Avoid direct copying—rephrase and improve upon what competitors are doing. Focus on clarity, customer appeal, and keyword inclusion.\n\nCompetitor Descriptions:\n${competitorDescriptions.map((d: string, i: number) => `${i + 1}. ${d}`).join("\n\n")}\n\nInstructions:\n- Each idea should be 3-6 sentences.\n- Use persuasive language and highlight unique selling points.\n- Incorporate relevant keywords where appropriate.\n- Do not repeat the same idea or phrasing.\n- Output as a JSON array of strings.\n\nExample Output:\n[\n  "Experience the vibrant taste of our ceremonial grade matcha, stone-ground from the finest Japanese tea leaves. ...",\n  "Unlock clean energy and focus with our organic matcha, shade-grown and hand-picked for maximum flavor. ..."\n]\nRespond ONLY with the JSON array, no extra commentary.`
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    })
+    const content = completion.choices[0].message.content?.trim() || "[]"
+    let result: string[] = []
+    try {
+      let cleanContent = content
+        .replace(/^```json\s*/i, "")
+        .replace(/^```/, "")
+        .replace(/```$/, "")
+        .trim()
+      result = JSON.parse(cleanContent)
+    } catch {
+      return NextResponse.json({ error: "Failed to parse GPT response" }, { status: 500 })
+    }
+    return NextResponse.json(result)
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
+/**
  * Next.js API route handler for /api/gpt-suggest
  * Dispatches POST requests to either:
  *   - Title suggestion (default)
  *   - Keyword gap analysis (if x-ll-ai-action: 'keyword-gap' header is set)
  *   - Bullet point gap analysis (if x-ll-ai-action: 'bullet-gap' header is set)
  *   - Bullet point ideas (if x-ll-ai-action: 'bullet-ideas' header is set)
+ *   - Description ideas (if x-ll-ai-action: 'description-ideas' header is set)
  */
 const handler = async (req: NextRequest) => {
   if (req.method !== 'POST') {
@@ -244,6 +281,10 @@ const handler = async (req: NextRequest) => {
   if (action === 'bullet-ideas') {
     // @ts-ignore
     return POST_bullet_ideas(req)
+  }
+  if (action === 'description-ideas') {
+    // @ts-ignore
+    return POST_description_ideas(req)
   }
   // Default: title suggestion
   return POST(req)
