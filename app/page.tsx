@@ -67,6 +67,11 @@ async function fetchProductTitle(asin: string): Promise<string> {
   return data.title
 }
 
+/**
+ * ListingLiftAI main page component.
+ * Handles authentication, product data input, AI optimization, and preview.
+ * Implements a side-by-side Before vs After preview in the Preview tab.
+ */
 export default function ListingLiftAI() {
   const [currentPage, setCurrentPage] = useState<PageState>("landing")
   const [user, setUser] = useState<User | null>(null)
@@ -208,6 +213,8 @@ export default function ListingLiftAI() {
   const [optimizeStep, setOptimizeStep] = useState<"title" | "bullet" | "description">("title")
   const [completedSteps, setCompletedSteps] = useState<Array<"title" | "bullet" | "description">>([])
 
+  const [originalListingData, setOriginalListingData] = useState<ListingData | null>(null)
+
   // When gptSuggestions changes, update visibleGptSuggestions
   useEffect(() => {
     setVisibleGptSuggestions(gptSuggestions)
@@ -338,7 +345,24 @@ export default function ListingLiftAI() {
       await fetchCompetitors(listingData.heroKeyword)
       // Fetch product title and set as first title in titles array
       const dbTitle = await fetchProductTitle(listingData.asin)
-      if (dbTitle) setTitles((prev) => [dbTitle, ...prev.slice(1)])
+      if (dbTitle) {
+        setTitles((prev) => [dbTitle, ...prev.slice(1)])
+      }
+      // Fetch full product data (title, bullet_points, description) and set originalListingData
+      const { data: fullProduct } = await supabase
+        .from("products")
+        .select("asin, title, bullet_points, description")
+        .eq("asin", listingData.asin)
+        .single();
+      if (fullProduct) {
+        setOriginalListingData({
+          asin: fullProduct.asin,
+          heroKeyword: listingData.heroKeyword,
+          title: fullProduct.title || "",
+          bulletPoints: (fullProduct.bullet_points || "").split("\n").filter(Boolean),
+          description: fullProduct.description || ""
+        });
+      }
       setActiveTab("optimize")
     } catch (error: any) {
       setError(error.message || "Failed to generate suggestions.")
@@ -1741,6 +1765,14 @@ export default function ListingLiftAI() {
                                 description: data.product?.description || ""
                               }))
                               setCompetitorDetails(data.competitors || [])
+                              // Set original listing data if not already set, using the fetched product data
+                              setOriginalListingData(prev => prev ? prev : {
+                                asin: listingData.asin,
+                                heroKeyword: listingData.heroKeyword,
+                                title: data.product?.title || "",
+                                bulletPoints: (data.product?.bullet_points || "").split("\n").filter(Boolean),
+                                description: data.product?.description || ""
+                              })
                               // After setting competitor details, trigger bullet gap analysis
                               const ourBullets = (data.product?.bullet_points || "").split("\n").filter(Boolean)
                               const competitorBullets = (data.competitors || []).map((c: any) => (c.bullet_points || "").split("\n").filter(Boolean))
@@ -1984,74 +2016,100 @@ export default function ListingLiftAI() {
                   Your Listing Preview 👀
                 </CardTitle>
                 <CardDescription className="text-purple-100 text-lg font-medium">
-                  This is how your optimized listing will look to customers - it's giving main character energy! ✨
+                  See your transformation side-by-side!
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-8 space-y-6">
-                {/* Title Preview */}
-                <div className="flex items-center gap-2 mb-4">
-                  <h2 className="text-2xl font-bold text-blue-600">{titles[chosenTitleIdx ?? 0] || listingData.title || "No title chosen"}</h2>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="ml-2 border-blue-400 text-blue-700 font-bold rounded-xl"
-                    onClick={async () => {
-                      await navigator.clipboard.writeText(titles[chosenTitleIdx ?? 0] || listingData.title || "")
-                      setCopiedField('title')
-                      setTimeout(() => setCopiedField(null), 1200)
-                    }}
-                  >
-                    {copiedField === 'title' ? 'Copied!' : 'Copy'}
-                  </Button>
-                </div>
-                {/* Bullet Points Preview */}
-                <div className="space-y-2">
-                  <h3 className="font-black text-lg">About this item</h3>
-                  <ul className="space-y-2">
-                    {chosenBulletIdxs.length > 0
-                      ? chosenBulletIdxs.map((idx, i) => (
-                          <li key={i} className="flex items-center gap-2 text-sm font-medium p-2 bg-gray-50 rounded-lg border-2 border-gray-200">
-                            <span>• {listingData.bulletPoints[idx]}</span>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="ml-2 border-green-400 text-green-700 font-bold rounded-xl"
-                              onClick={async () => {
-                                await navigator.clipboard.writeText(listingData.bulletPoints[idx] || "")
-                                setCopiedField('bullet-' + idx)
-                                setTimeout(() => setCopiedField(null), 1200)
-                              }}
-                            >
-                              {copiedField === 'bullet-' + idx ? 'Copied!' : 'Copy'}
-                            </Button>
-                          </li>
-                        ))
-                      : <li className="text-sm text-gray-500 font-medium p-2 bg-gray-50 rounded-lg border-2 border-gray-200">No bullet points chosen.</li>}
-                  </ul>
-                </div>
-                {/* Description Preview */}
-                <div className="space-y-3">
-                  <h3 className="font-black text-lg">Product Description</h3>
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm whitespace-pre-wrap font-medium p-4 bg-gray-50 rounded-2xl border-2 border-gray-200 flex-1">
-                      {chosenDescriptionIdx !== null && descriptionDrafts[chosenDescriptionIdx]
-                        ? descriptionDrafts[chosenDescriptionIdx]
-                        : "No description chosen."}
+              <CardContent className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Before (Original) */}
+                  <div>
+                    <h3 className="font-black text-lg mb-2 text-gray-700">Before (Original)</h3>
+                    <div className="mb-4">
+                      <div className="text-xs font-bold text-gray-500 mb-1">Title</div>
+                      <div className="p-3 bg-gray-100 rounded">{originalListingData?.title || "No original title"}</div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="ml-2 border-purple-400 text-purple-700 font-bold rounded-xl"
-                      onClick={async () => {
-                        await navigator.clipboard.writeText(
-                          (chosenDescriptionIdx !== null && descriptionDrafts[chosenDescriptionIdx]) || ""
-                        )
-                        setCopiedField('description')
-                        setTimeout(() => setCopiedField(null), 1200)
-                      }}
-                    >
-                      {copiedField === 'description' ? 'Copied!' : 'Copy'}
-                    </Button>
+                    <div className="mb-4">
+                      <div className="text-xs font-bold text-gray-500 mb-1">Bullet Points</div>
+                      <ul className="space-y-1">
+                        {(originalListingData?.bulletPoints || []).map((bp, i) => (
+                          <li key={i} className="p-2 bg-gray-50 rounded">{bp}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-gray-500 mb-1">Description</div>
+                      <div className="p-3 bg-gray-100 rounded">{originalListingData?.description || "No original description"}</div>
+                    </div>
+                  </div>
+                  {/* After (Optimized) */}
+                  <div>
+                    <h3 className="font-black text-lg mb-2 text-blue-700">After (Optimized)</h3>
+                    {/* Title Preview */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <h2 className="text-2xl font-bold text-blue-600">{titles[chosenTitleIdx ?? 0] || listingData.title || "No title chosen"}</h2>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="ml-2 border-blue-400 text-blue-700 font-bold rounded-xl"
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(titles[chosenTitleIdx ?? 0] || listingData.title || "")
+                          setCopiedField('title')
+                          setTimeout(() => setCopiedField(null), 1200)
+                        }}
+                      >
+                        {copiedField === 'title' ? 'Copied!' : 'Copy'}
+                      </Button>
+                    </div>
+                    {/* Bullet Points Preview */}
+                    <div className="space-y-2">
+                      <h3 className="font-black text-lg">About this item</h3>
+                      <ul className="space-y-2">
+                        {chosenBulletIdxs.length > 0
+                          ? chosenBulletIdxs.map((idx, i) => (
+                              <li key={i} className="flex items-center gap-2 text-sm font-medium p-2 bg-gray-50 rounded-lg border-2 border-gray-200">
+                                <span>• {listingData.bulletPoints[idx]}</span>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="ml-2 border-green-400 text-green-700 font-bold rounded-xl"
+                                  onClick={async () => {
+                                    await navigator.clipboard.writeText(listingData.bulletPoints[idx] || "")
+                                    setCopiedField('bullet-' + idx)
+                                    setTimeout(() => setCopiedField(null), 1200)
+                                  }}
+                                >
+                                  {copiedField === 'bullet-' + idx ? 'Copied!' : 'Copy'}
+                                </Button>
+                              </li>
+                            ))
+                          : <li className="text-sm text-gray-500 font-medium p-2 bg-gray-50 rounded-lg border-2 border-gray-200">No bullet points chosen.</li>}
+                      </ul>
+                    </div>
+                    {/* Description Preview */}
+                    <div className="space-y-3">
+                      <h3 className="font-black text-lg">Product Description</h3>
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm whitespace-pre-wrap font-medium p-4 bg-gray-50 rounded-2xl border-2 border-gray-200 flex-1">
+                          {chosenDescriptionIdx !== null && descriptionDrafts[chosenDescriptionIdx]
+                            ? descriptionDrafts[chosenDescriptionIdx]
+                            : "No description chosen."}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="ml-2 border-purple-400 text-purple-700 font-bold rounded-xl"
+                          onClick={async () => {
+                            await navigator.clipboard.writeText(
+                              (chosenDescriptionIdx !== null && descriptionDrafts[chosenDescriptionIdx]) || ""
+                            )
+                            setCopiedField('description')
+                            setTimeout(() => setCopiedField(null), 1200)
+                          }}
+                        >
+                          {copiedField === 'description' ? 'Copied!' : 'Copy'}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
