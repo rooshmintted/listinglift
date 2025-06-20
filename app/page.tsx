@@ -215,6 +215,28 @@ export default function ListingLiftAI() {
 
   const [originalListingData, setOriginalListingData] = useState<ListingData | null>(null)
 
+  // Add new state for preview keyword gap analysis
+  const [previewKeywordGap, setPreviewKeywordGap] = useState<any>(null)
+  const [previewKeywordGapLoading, setPreviewKeywordGapLoading] = useState(false)
+  const [previewKeywordGapError, setPreviewKeywordGapError] = useState("")
+
+  // Prepopulate descriptionDrafts with original description when entering description step
+  useEffect(() => {
+    if (optimizeStep === "description" && originalListingData?.description) {
+      setDescriptionDrafts(prev => {
+        // Only add if not already present
+        if (prev.length === 1 && prev[0] === "") {
+          return [originalListingData.description]
+        }
+        // If original description is not in drafts, prepend it
+        if (!prev.includes(originalListingData.description)) {
+          return [originalListingData.description, ...prev]
+        }
+        return prev
+      })
+    }
+  }, [optimizeStep, originalListingData])
+
   // When gptSuggestions changes, update visibleGptSuggestions
   useEffect(() => {
     setVisibleGptSuggestions(gptSuggestions)
@@ -1064,14 +1086,6 @@ export default function ListingLiftAI() {
                       Here's how your optimized listing will appear. Copy your final listing attributes over to Seller Central for upload.
                     </div>
                   )}
-                </div>
-                <div className="flex gap-2">
-                  <Button className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl border-2 border-gray-500 text-sm">
-                    💾 Save Optimization
-                  </Button>
-                  <Button className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl border-2 border-gray-500 text-sm">
-                    📂 Load Previous
-                  </Button>
                 </div>
               </div>
             </div>
@@ -2020,6 +2034,67 @@ export default function ListingLiftAI() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-8">
+                {/* Keyword Gap Analysis Section */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-black text-blue-700 mb-2 flex items-center gap-2">
+                    <BarChart3 className="w-6 h-6 text-blue-400" />
+                    Keyword Improvements: Before vs After
+                  </h3>
+                  {previewKeywordGapLoading && <div className="text-blue-600 font-bold">Analyzing keyword improvements...</div>}
+                  {previewKeywordGapError && <div className="text-red-600 font-bold">{previewKeywordGapError}</div>}
+                  {previewKeywordGap && (
+                    <div className="space-y-4">
+                      {/* High Value Gaps */}
+                      <div>
+                        <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
+                          <Badge className="bg-blue-600 text-white text-xs font-black border-2 border-blue-900">High Value Gaps (Now Included)</Badge>
+                          <span className="text-xs text-blue-900">(Added to your optimized title!)</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {(previewKeywordGap.high_value_gaps || []).length > 0 ? (
+                            previewKeywordGap.high_value_gaps.map((kw: string) => (
+                              <Badge key={kw} className="bg-blue-100 text-blue-800 border-blue-300 font-bold text-xs">{kw}</Badge>
+                            ))
+                          ) : (
+                            <span className="text-xs text-gray-500">No new high value keywords added.</span>
+                          )}
+                        </div>
+                      </div>
+                      {/* Missing Keywords */}
+                      <div>
+                        <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
+                          <Badge className="bg-cyan-600 text-white text-xs font-black border-2 border-cyan-900">Still Missing Keywords</Badge>
+                          <span className="text-xs text-cyan-900">(Not in your optimized title)</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {(previewKeywordGap.missing_keywords || []).length > 0 ? (
+                            previewKeywordGap.missing_keywords.map((kw: any, i: number) => (
+                              <Badge key={kw.keyword + i} className="bg-cyan-100 text-cyan-800 border-cyan-300 font-bold text-xs">{kw.keyword}</Badge>
+                            ))
+                          ) : (
+                            <span className="text-xs text-gray-500">No missing keywords.</span>
+                          )}
+                        </div>
+                      </div>
+                      {/* Our Existing Keywords */}
+                      <div>
+                        <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
+                          <Badge className="bg-green-600 text-white text-xs font-black border-2 border-green-900">Optimized Title Keywords</Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {(previewKeywordGap.our_existing_keywords || []).length > 0 ? (
+                            previewKeywordGap.our_existing_keywords.map((kw: string) => (
+                              <Badge key={kw} className="bg-green-100 text-green-800 border-green-300 font-bold text-xs">{kw}</Badge>
+                            ))
+                          ) : (
+                            <span className="text-xs text-gray-500">No keywords found in your optimized title.</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* ...existing preview content... */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Before (Original) */}
                   <div>
