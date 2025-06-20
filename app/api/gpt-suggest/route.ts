@@ -45,7 +45,7 @@ async function POST(req: NextRequest) {
 
 Requirements:
 - The hero keyword must always be included in each suggested title.
-- If most competitor titles use the hero keyword near the front (within the first 5 words), place it more prominently (as close to the front as possible). Otherwise, you may keep it in its current place from the current title.
+- If most competitor titles use the hero keyword near the front (within the first 5 words), place it more prominently (as close to the front as possible). Otherwise, you may keep it in its current place from the current title. You are being given the top competitor titles, so make sure to include keywords that are in the top competitor titles in some of your suggestions.
 - For each suggestion, respond with a JSON object in the following format:
 {
   "title": "[Optimized title suggestion]",

@@ -82,7 +82,7 @@ export async function scrapeDecodo(params: Record<string, any>): Promise<any> {
     headers: {
       "Content-Type": "application/json",
       "Accept": "application/json",
-      "Authorization": "Basic VTAwMDAyODA1MjE6UFdfMTEyNWVjMzBjY2U3MDEzYTU3YTBiZDI3YmU0ZDI2YTA4",
+      "Authorization": key,
       //"Authorization": key,
     },
     body: JSON.stringify(params),
@@ -132,4 +132,16 @@ export async function scrapeDecodo(params: Record<string, any>): Promise<any> {
   }
 
   return data
+}
+
+/**
+ * Fires multiple Decodo API requests in parallel.
+ * @param {Array<Record<string, any>>} paramsArray - Array of Decodo API parameter objects.
+ * @returns {Promise<Array<any>>} - Array of Decodo API responses.
+ * @throws Error if any request fails.
+ */
+export async function scrapeDecodoBatch(paramsArray: Record<string, any>[]): Promise<any[]> {
+  if (!Array.isArray(paramsArray)) throw new Error("paramsArray must be an array")
+  // Fire all requests in parallel
+  return Promise.all(paramsArray.map(params => scrapeDecodo(params)))
 } 

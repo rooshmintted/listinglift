@@ -6,7 +6,7 @@
  */
 import { NextRequest, NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
-import { scrapeDecodo } from "@/lib/decodo"
+import { scrapeDecodo, scrapeDecodoBatch } from "@/lib/decodo"
 
 export async function POST(req: NextRequest) {
   try {
@@ -59,8 +59,10 @@ export async function POST(req: NextRequest) {
       const prod = competitorProductMap[asin]
       return !prod || prod.bullet_points === null || prod.description === null
     })
-    for (const asin of competitorsToFetch) {
-      await scrapeDecodo({ target: "amazon_product", query: asin, parse: true, autoselect_variant: false })
+    if (competitorsToFetch.length > 0) {
+      await scrapeDecodoBatch(
+        competitorsToFetch.map(asin => ({ target: "amazon_product", query: asin, parse: true, autoselect_variant: false }))
+      )
     }
     // Re-fetch competitor products after Decodo
     const { data: updatedCompetitorProducts } = await supabase
