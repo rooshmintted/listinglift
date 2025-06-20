@@ -983,9 +983,21 @@ export default function ListingLiftAI() {
             {/* Left Column: Branding & Quick Actions (1/3) */}
             <div className="flex flex-col justify-between xl:w-1/3 w-full">
               <div>
-                <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-100 to-yellow-200 mb-2 tracking-tight">
-                  ListingLift<span className="text-orange-200">.ai</span>
-                </h1>
+                <div className="flex items-center gap-4 mb-2">
+                  <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-100 to-yellow-200 tracking-tight">
+                    ListingLift<span className="text-orange-200">.ai</span>
+                  </h1>
+                  {user && (
+                    <Button
+                      onClick={handleLogout}
+                      className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-xl ml-2"
+                      size="sm"
+                      aria-label="Logout"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-5 h-5 text-orange-100" />
                   <span className="text-xl font-bold text-white drop-shadow">Amazon Listing Optimizer</span>
@@ -1117,14 +1129,6 @@ export default function ListingLiftAI() {
                 )}
               </div>
             </div>
-            {/* Logout button, absolutely positioned */}
-            <Button
-              onClick={handleLogout}
-              className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white p-2 rounded-xl"
-              size="sm"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
           </div>
         </div>
 
@@ -1258,6 +1262,9 @@ export default function ListingLiftAI() {
                 <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
                   <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
                     <CardTitle className="text-xl font-black">Your Description</CardTitle>
+                    <CardDescription className="text-green-100 font-medium">
+                      Time to make your listing absolutely iconic 💅
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-6">
                     {descriptionDrafts.map((desc, idx) => (
@@ -1320,11 +1327,14 @@ export default function ListingLiftAI() {
                       <Lightbulb className="w-6 h-6" />
                       AI Description Suggestions
                     </CardTitle>
+                    <CardDescription className="text-yellow-100 font-medium">
+                      Your personal conversion coach is here! 🚀
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     <Button
                       type="button"
-                      className="font-bold border-2 rounded-xl bg-purple-100 text-purple-700 border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+                      className="w-full text-xs font-bold bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700 border-2 border-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
                       onClick={async () => {
                         setDescriptionIdeasLoading(true)
                         setDescriptionIdeasError("")
@@ -1351,7 +1361,17 @@ export default function ListingLiftAI() {
                       }}
                       disabled={descriptionIdeasLoading || competitorDetails.length === 0}
                     >
-                      {descriptionIdeasLoading ? "Generating..." : "Generate AI Description Suggestions"}
+                      {descriptionIdeasLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                          Generating GPT-4o Suggestion...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Get GPT-4o Description Suggestions
+                        </>
+                      )}
                     </Button>
                     {descriptionIdeasError && <div className="text-xs text-red-600 font-bold mt-2">{descriptionIdeasError}</div>}
                     {descriptionIdeas && (
@@ -1383,6 +1403,12 @@ export default function ListingLiftAI() {
                         ))}
                       </div>
                     )}
+                    {!descriptionIdeas && !descriptionIdeasLoading && (
+                      <div className="text-center py-12">
+                        <div className="text-6xl mb-4">🤖</div>
+                        <p className="text-gray-500 font-medium">Generate suggestions to unlock the AI magic!</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
                 {/* Column 3: Competitor Descriptions */}
@@ -1392,6 +1418,9 @@ export default function ListingLiftAI() {
                       <Target className="w-6 h-6" />
                       Competitor Descriptions
                     </CardTitle>
+                    <CardDescription className="text-cyan-100 font-medium">
+                      Spying on the competition for "{listingData.heroKeyword}" 👀
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     {competitorDetails.map((comp, idx) => (
@@ -1412,8 +1441,11 @@ export default function ListingLiftAI() {
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Column 1: Current Bullet Points */}
                 <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 flex flex-row items-center justify-between">
+                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
                     <CardTitle className="text-xl font-black">Your Bullet Points (Choose 5)</CardTitle>
+                    <CardDescription className="text-green-100 font-medium">
+                      Time to make your listing absolutely iconic 💅
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-6">
                     <div className="space-y-3">
@@ -1501,11 +1533,14 @@ export default function ListingLiftAI() {
                       <Lightbulb className="w-6 h-6" />
                       AI Bullet Point Suggestions
                     </CardTitle>
+                    <CardDescription className="text-yellow-100 font-medium">
+                      Your personal conversion coach is here! 🚀
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     <Button
                       type="button"
-                      className="font-bold border-2 rounded-xl bg-purple-100 text-purple-700 border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+                      className="w-full text-xs font-bold bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700 border-2 border-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
                       onClick={async () => {
                         setBulletIdeasLoading(true)
                         setBulletIdeasError("")
@@ -1532,7 +1567,17 @@ export default function ListingLiftAI() {
                       }}
                       disabled={bulletIdeasLoading || competitorDetails.length === 0}
                     >
-                      {bulletIdeasLoading ? "Generating..." : "Generate AI Bullet Point Suggestions"}
+                      {bulletIdeasLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                          Generating GPT-4o Suggestion...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Get GPT-4o Bullet Point Suggestions
+                        </>
+                      )}
                     </Button>
                     {bulletIdeasError && <div className="text-xs text-red-600 font-bold mt-2">{bulletIdeasError}</div>}
                     {/* AI Bullet Point Ideas Cards */}
@@ -1565,6 +1610,12 @@ export default function ListingLiftAI() {
                         ))}
                       </div>
                     )}
+                    {!bulletIdeas && !bulletIdeasLoading && (
+                      <div className="text-center py-12">
+                        <div className="text-6xl mb-4">🤖</div>
+                        <p className="text-gray-500 font-medium">Generate suggestions to unlock the AI magic!</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
                 {/* Column 3: Competitor Bullet Points */}
@@ -1574,6 +1625,9 @@ export default function ListingLiftAI() {
                       <Target className="w-6 h-6" />
                       Competitor Bullet Points
                     </CardTitle>
+                    <CardDescription className="text-cyan-100 font-medium">
+                      Spying on the competition for "{listingData.heroKeyword}" 👀
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     {/* Show top 10 competitors' bullet points only (no description) */}
@@ -1740,7 +1794,7 @@ export default function ListingLiftAI() {
                   <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
                     <CardTitle className="flex items-center gap-2 text-xl font-black">
                       <Lightbulb className="w-6 h-6" />
-                      AI Suggestions 🤖
+                      AI Suggestions
                     </CardTitle>
                     <CardDescription className="text-yellow-100 font-medium">
                       Your personal conversion coach is here! 🚀
@@ -1875,7 +1929,7 @@ export default function ListingLiftAI() {
                   <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
                     <CardTitle className="flex items-center gap-2 text-xl font-black">
                       <Target className="w-6 h-6" />
-                      Competitor Intel 🕵️
+                      Competitor Intel 
                     </CardTitle>
                     <CardDescription className="text-cyan-100 font-medium">
                       Spying on the competition for "{listingData.heroKeyword}" 👀
