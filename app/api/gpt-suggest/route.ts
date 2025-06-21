@@ -41,11 +41,27 @@ async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing heroKeyword" }, { status: 400 })
     }
 
-    const prompt = `You are an expert Amazon listing optimizer. Given the current product title, the hero keyword, and a list of bestselling competitor titles, suggest 5 highly optimized product titles. Each suggestion should focus on optimizing a single aspect: Keyword Stuffing (SEO) 
+    const prompt = `You are a world-class Amazon title copywriter and SEO strategist.
+You will be given:
+A current product title
+A hero keyword
+A list of bestselling competitor titles
 
-Requirements:
-- The hero keyword must always be included in each suggested title.
-- If most competitor titles use the hero keyword near the front (within the first 5 words), place it more prominently (as close to the front as possible). Otherwise, you may keep it in its current place from the current title. You are being given the top competitor titles, so make sure to include keywords that are in the top competitor titles in some of your suggestions.
+Your task:
+
+1.⁠ ⁠Extract the most frequently occurring words and phrases (n-grams of 1, 2, or 3 words) from the competitor titles, giving priority to those that appear in the first 100 characters of competitor titles.
+2.⁠ ⁠Generate 5 optimized product title suggestions:
+
+Each should maximize use of the most frequent words/phrases from competitors.
+
+Do NOT invent or insert unrelated words (like "Gourmet", "Deluxe", "Feast", or "Selection") unless those words are frequent across competitors.
+
+Favor high-frequency phrases as close to the front of title as possible (within Amazon’s 200 character limit).
+
+Maintain compliance with Amazon style guidelines (avoid excess symbols, capitalization, or unnatural structures).
+
+The hero keyword must appear near the front (top 5 words) of the title.
+
 - For each suggestion, respond with a JSON object in the following format:
 {
   "title": "[Optimized title suggestion]",
@@ -195,7 +211,22 @@ async function POST_bullet_ideas(req: NextRequest) {
     if (!Array.isArray(competitorBullets)) {
       return NextResponse.json({ error: "Missing competitorBullets" }, { status: 400 })
     }
-    const prompt = `You are an expert Amazon listing copywriter. Given the bullet points from top competitors for a product, generate 10 creative, high-converting ideas for a single bullet point for our product. Each idea should be concise, persuasive, and highlight a unique benefit or feature, while leveraging the best elements from the competitor bullet points. Avoid direct copying—rephrase and improve upon what competitors are doing. Focus on clarity, customer appeal, and keyword inclusion. Make each 200-250 characters.\n\nCompetitor Bullet Points:\n${competitorBullets.map((b: string, i: number) => `${i + 1}. ${b}`).join("\n")}\n\nInstructions:\n- Each idea should be 1–2 sentences.\n- Use persuasive language and highlight unique selling points.\n- Incorporate relevant keywords where appropriate.\n- Do not repeat the same idea or phrasing.\n- Output as a JSON array of strings.\n\nExample Output:\n[\n  "Crafted from 100% organic matcha for a pure, vibrant flavor in every cup.",\n  "Stone-ground in Japan for a smooth, ceremonial-grade texture and taste.",\n  "Rich in antioxidants to support energy and focus throughout your day.",\n  "Perfect for lattes, smoothies, and baking—versatile for any recipe.",\n  "Resealable packaging keeps your matcha fresh and flavorful longer.",\n  "Sourced from first harvest leaves for maximum nutritional value.",\n  "Naturally gluten-free, vegan, and non-GMO for a clean, healthy choice.",\n  "Shade-grown and hand-picked for superior quality and color.",\n  "Tested for purity and safety, free from additives and preservatives.",\n  "Loved by baristas and home brewers alike for its exceptional taste."
+    const prompt = `You are a world-class Amazon listing copywriter and SEO strategist.
+You will be given:
+Our current product bullet points
+A hero keyword
+A list of bestselling competitor bullet points
+
+Your task:
+Extract the most frequently occurring words and phrases (n-grams of 1, 2, or 3 words) from the competitor bullets (and optionally titles), giving priority to phrases that appear at least twice across listings.
+Generate 10 creative, high-converting ideas for a single bullet point for our product:
+Each idea must be 200-250 characters.
+Each should maximize use of the most frequent words/phrases from competitors.
+Do NOT copy bullet points directly — rephrase and improve upon what competitors are doing.
+Include unique benefits or features where possible (based on patterns seen in competitor listings).
+No repeated ideas — ensure variety across the 10 ideas.
+    \n\nCompetitor Bullet Points:\n${competitorBullets.map((b: string, i: number) => `${i + 1}. ${b}`).join("\n")}\n\n
+    Output as a JSON array of strings.
 ]\nRespond ONLY with the JSON array, no extra commentary.`
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
