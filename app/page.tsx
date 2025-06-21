@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { SpellcheckTextarea } from "@/components/ui/spellcheck-textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -545,6 +546,94 @@ export default function ListingLiftAI() {
       setShouldAnalyzeKeywords(true)
     }
   }, [activeTab, lastAnalyzed])
+
+  // Auto-generate AI title suggestions when optimize tab loads for title step
+  useEffect(() => {
+    if (
+      activeTab === "optimize" && 
+      optimizeStep === "title" && 
+      !gptSuggestions && 
+      !gptLoading && 
+      titles[0] && 
+      competitors.length > 0
+    ) {
+      fetchGptSuggestion()
+    }
+  }, [activeTab, optimizeStep, gptSuggestions, gptLoading, titles, competitors])
+
+  // Auto-generate AI bullet point suggestions when optimize tab loads for bullet step
+  useEffect(() => {
+    if (
+      activeTab === "optimize" && 
+      optimizeStep === "bullet" && 
+      !bulletIdeas && 
+      !bulletIdeasLoading && 
+      competitorDetails.length > 0
+    ) {
+      const generateBulletIdeas = async () => {
+        setBulletIdeasLoading(true)
+        setBulletIdeasError("")
+        setBulletIdeas(null)
+        try {
+          // Gather all competitor bullet points (flattened)
+          const allCompetitorBullets = competitorDetails.flatMap((c: any) => (c.bullet_points || "").split("\n").filter(Boolean))
+          const res = await fetch("/api/gpt-suggest", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-ll-ai-action": "bullet-ideas"
+            },
+            body: JSON.stringify({ competitorBullets: allCompetitorBullets })
+          })
+          if (!res.ok) throw new Error(await res.text())
+          const data = await res.json()
+          setBulletIdeas(data)
+        } catch (err: any) {
+          setBulletIdeasError(err.message || "Failed to generate bullet point ideas.")
+        } finally {
+          setBulletIdeasLoading(false)
+        }
+      }
+      generateBulletIdeas()
+    }
+  }, [activeTab, optimizeStep, bulletIdeas, bulletIdeasLoading, competitorDetails])
+
+  // Auto-generate AI description suggestions when optimize tab loads for description step
+  useEffect(() => {
+    if (
+      activeTab === "optimize" && 
+      optimizeStep === "description" && 
+      !descriptionIdeas && 
+      !descriptionIdeasLoading && 
+      competitorDetails.length > 0
+    ) {
+      const generateDescriptionIdeas = async () => {
+        setDescriptionIdeasLoading(true)
+        setDescriptionIdeasError("")
+        setDescriptionIdeas(null)
+        try {
+          // Gather all competitor descriptions
+          const competitorDescs = competitorDetails.map((c: any) => c.description || "").filter(Boolean)
+          const res = await fetch("/api/gpt-suggest", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-ll-ai-action": "description-ideas"
+            },
+            body: JSON.stringify({ competitorDescriptions: competitorDescs })
+          })
+          if (!res.ok) throw new Error(await res.text())
+          const data = await res.json()
+          setDescriptionIdeas(data)
+        } catch (err: any) {
+          setDescriptionIdeasError(err.message || "Failed to generate description ideas.")
+        } finally {
+          setDescriptionIdeasLoading(false)
+        }
+      }
+      generateDescriptionIdeas()
+    }
+  }, [activeTab, optimizeStep, descriptionIdeas, descriptionIdeasLoading, competitorDetails])
 
   // Utility to add a step to completedSteps only if not already present
   function markStepCompleted(step: "title" | "bullet" | "description") {
@@ -1335,10 +1424,10 @@ export default function ListingLiftAI() {
                   <CardContent className="p-6 space-y-6">
                     {descriptionDrafts.map((desc, idx) => (
                       <div key={idx} className={`flex flex-col gap-1 mb-4 border-2 rounded-xl ${chosenDescriptionIdx === idx ? 'border-green-500 bg-green-50' : 'border-green-300 bg-white'}`}>
-                        <Textarea
+                        <SpellcheckTextarea
                           rows={10}
                           value={desc}
-                          onChange={e => setDescriptionDrafts(prev => prev.map((d, i) => i === idx ? e.target.value : d))}
+                          onChange={value => setDescriptionDrafts(prev => prev.map((d, i) => i === idx ? value : d))}
                           className="rounded-xl flex-1 bg-transparent"
                           placeholder={`Description ${idx + 1}`}
                         />
@@ -1435,7 +1524,7 @@ export default function ListingLiftAI() {
                       ) : (
                         <>
                           <Sparkles className="w-4 h-4 mr-2" />
-                          Get GPT-4o Description Suggestions
+                          Get AI Optimized Description Ideas
                         </>
                       )}
                     </Button>
@@ -1523,12 +1612,12 @@ export default function ListingLiftAI() {
                             key={idx}
                             className={`flex flex-col gap-1 mb-4 border-2 rounded-xl ${isSelected ? 'border-green-500 bg-green-50' : 'border-green-300 bg-white'}`}
                           >
-                            <Textarea
+                            <SpellcheckTextarea
                               rows={2}
                               value={bp}
-                              onChange={e => setListingData(prev => {
+                              onChange={value => setListingData(prev => {
                                 const newBullets = [...prev.bulletPoints]
-                                newBullets[idx] = e.target.value
+                                newBullets[idx] = value
                                 return { ...prev, bulletPoints: newBullets }
                               })}
                               className="rounded-xl flex-1 bg-transparent"
@@ -1641,7 +1730,7 @@ export default function ListingLiftAI() {
                       ) : (
                         <>
                           <Sparkles className="w-4 h-4 mr-2" />
-                          Get GPT-4o Bullet Point Suggestions
+                          Get AI Optimized Bullet Point Ideas
                         </>
                       )}
                     </Button>
@@ -1746,11 +1835,11 @@ export default function ListingLiftAI() {
                       )}
                       {titles.slice(1).map((title, idx) => (
                         <div key={idx + 1} className={`mb-4 border-2 rounded-xl p-2 ${chosenTitleIdx === idx + 1 ? 'border-green-500 ring-2 ring-green-400' : 'border-transparent'}`}>
-                          <Textarea
+                          <SpellcheckTextarea
                             rows={5}
                             placeholder="Make it pop! Front-load your keyword and add some spice... 🌶️"
                             value={title}
-                            onChange={e => updateTitle(idx + 1, e.target.value)}
+                            onChange={value => updateTitle(idx + 1, value)}
                             className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium w-full"
                           />
                           <div className="flex gap-2 mt-2 justify-end">
@@ -1890,7 +1979,7 @@ export default function ListingLiftAI() {
                         ) : (
                           <>
                             <Sparkles className="w-4 h-4 mr-2" />
-                            Get GPT-4o Optimized Title
+                            Get AI Optimized Title Ideas
                           </>
                         )}
                       </Button>

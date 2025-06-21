@@ -21,18 +21,34 @@ export async function POST(req: NextRequest) {
   if (!text) return NextResponse.json([], { status: 200 })
 
   const prompt = `
-Check the following product title for spelling mistakes. 
-For each misspelled word, return a JSON array with:
-- word: the misspelled word
-- start: start index in the string
-- end: end index (exclusive)
-- suggestion: the correct spelling
+Check the following product title for actual spelling mistakes that need correction.
+
+IMPORTANT RULES:
+- Only return words that are genuinely misspelled (wrong spelling)
+- Do NOT return suggestions where the word and suggestion are identical
+- Do NOT suggest changes for correctly spelled words, proper nouns, or brand names
+- Do NOT suggest changes for stylistic preferences or grammar issues
+- Focus only on clear spelling errors
+
+For each genuinely misspelled word, return a JSON array with:
+- word: the exact misspelled word as it appears
+- start: start index in the string (inclusive)
+- end: end index in the string (exclusive)
+- suggestion: the correct spelling (must be different from the original word)
 
 Text: "${text}"
 
-Respond ONLY with a JSON array, e.g.:
-[{"word":"teh","start":5,"end":8,"suggestion":"the"}]
-If there are no mistakes, return [].
+Examples of what TO include:
+- "teh" → "the"
+- "recieve" → "receive" 
+- "seperate" → "separate"
+
+Examples of what NOT to include:
+- "don't" → "don't" (identical)
+- "iPhone" → "iphone" (brand name)
+- "WiFi" → "Wi-Fi" (stylistic)
+
+Respond ONLY with a JSON array. If no spelling mistakes exist, return [].
   `.trim()
 
   const completion = await openai.chat.completions.create({
@@ -46,6 +62,16 @@ If there are no mistakes, return [].
   let result = []
   try {
     result = JSON.parse(content)
+    
+    // Filter out nonsensical suggestions where word and suggestion are identical
+    result = result.filter((error: any) => {
+      if (!error.word || !error.suggestion) return false
+      if (error.word === error.suggestion) {
+        console.log("Filtered out identical suggestion:", error)
+        return false
+      }
+      return true
+    })
   } catch {
     result = []
   }
