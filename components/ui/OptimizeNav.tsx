@@ -55,9 +55,9 @@ const OptimizeNav: React.FC<OptimizeNavProps> = ({ step, completedSteps, onStepC
                 type="button"
                 className={
                   isActive
-                    ? "px-6 py-2 rounded-full font-semibold bg-gradient-to-r from-orange-400 to-pink-500 text-white shadow transition-all"
+                    ? "px-6 py-2 rounded-full font-semibold bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] text-white shadow transition-all"
                     : available
-                    ? "px-6 py-2 rounded-full font-semibold text-gray-700 bg-white hover:bg-orange-100 cursor-pointer transition-all"
+                    ? "px-6 py-2 rounded-full font-semibold text-gray-700 bg-white hover:bg-[#F5B041]/20 cursor-pointer transition-all"
                     : "px-6 py-2 rounded-full font-semibold text-gray-400 bg-gray-100 cursor-not-allowed opacity-60 select-none relative group"
                 }
                 onClick={() => available && onStepChange(s.key)}

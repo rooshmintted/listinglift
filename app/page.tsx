@@ -664,7 +664,7 @@ export default function ListingLiftAI() {
   // Show loading spinner while checking auth
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#F5B041] to-[#E67E22] flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white"></div>
       </div>
     )
@@ -672,20 +672,20 @@ export default function ListingLiftAI() {
 
   if (currentPage === "landing") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#F5B041] to-[#E67E22] relative overflow-hidden">
         <BackgroundPattern />
 
         <div className="container mx-auto px-4 py-8 relative z-10">
           {/* Hero Section */}
           <div className="text-center mb-16">
-            <div className="inline-block p-8 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border-4 border-orange-500 transform hover:rotate-1 transition-transform duration-300 mb-8">
-              <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 mb-6 tracking-tight">
-                ListingLift<span className="text-orange-600">.ai</span>
+            <div className="inline-block p-8 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border-4 border-[#2C3E50] transform hover:rotate-1 transition-transform duration-300 mb-8">
+              <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#2C3E50] via-[#4A5568] to-[#718096] mb-6 tracking-tight">
+                ListingLift<span className="text-[#F5B041]">.ai</span>
               </h1>
               <div className="flex items-center justify-center gap-3 mb-6">
-                <Sparkles className="w-8 h-8 text-orange-500" />
+                <Sparkles className="w-8 h-8 text-[#F5B041]" />
                 <p className="text-3xl font-black text-gray-800">Turn Boring Listings Into Money Machines</p>
-                <Fire className="w-8 h-8 text-red-500" />
+                <Fire className="w-8 h-8 text-[#F5B041]" />
               </div>
               <p className="text-xl text-gray-700 max-w-3xl mx-auto font-bold mb-8">
                 AI-powered Amazon optimization that actually gets shoppers to click "Add to Cart" 🛒✨
@@ -694,7 +694,7 @@ export default function ListingLiftAI() {
               <div className="flex gap-4 justify-center">
                 <Button
                   onClick={() => setCurrentPage("signup")}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-2xl px-16 py-8 rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-orange-400 hover:border-orange-300"
+                  className="bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] hover:from-[#1A252F] hover:to-[#1A252F] text-white font-black text-2xl px-16 py-8 rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-[#2C3E50] hover:border-[#1A252F]"
                 >
                   <Rocket className="w-8 h-8 mr-4" />
                   Start Making Bank Now! 💰
@@ -705,7 +705,7 @@ export default function ListingLiftAI() {
               <div className="mt-6">
                 <button
                   onClick={() => setCurrentPage("login")}
-                  className="text-orange-600 hover:text-orange-700 font-bold underline text-lg"
+                  className="text-[#2C3E50] hover:text-[#1A252F] font-bold underline text-lg"
                 >
                   Already have an account? Sign in here! 👋
                 </button>
@@ -716,21 +716,21 @@ export default function ListingLiftAI() {
           {/* Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
             {[
-              { icon: TrendingUp, stat: "7%", label: "Avg Conversion Boost", color: "from-green-500 to-emerald-500" },
-              { icon: DollarSign, stat: "$1.3M+", label: "Revenue Generated", color: "from-yellow-500 to-orange-500" },
-              { icon: Users, stat: "12K+", label: "Happy Sellers", color: "from-blue-500 to-cyan-500" },
-              { icon: Star, stat: "4.9/5", label: "User Rating", color: "from-purple-500 to-pink-500" },
+              { icon: TrendingUp, stat: "7%", label: "Avg Conversion Boost", color: "from-[#F5B041] to-[#F5B041]" },
+              { icon: DollarSign, stat: "$1.3M+", label: "Revenue Generated", color: "from-[#F5B041] to-[#F5B041]" },
+              { icon: Users, stat: "12K+", label: "Happy Sellers", color: "from-[#F5B041] to-[#F5B041]" },
+              { icon: Star, stat: "4.9/5", label: "User Rating", color: "from-[#F5B041] to-[#F5B041]" },
             ].map((item, index) => (
               <Card
                 key={index}
-                className="bg-white/95 backdrop-blur-sm border-4 border-orange-300 shadow-xl rounded-3xl overflow-hidden transform hover:scale-105 transition-all duration-300"
+                className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-xl rounded-3xl overflow-hidden transform hover:scale-105 transition-all duration-300"
               >
                 <CardContent className="p-6 text-center">
                   <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-r ${item.color} mb-4`}>
                     <item.icon className="w-8 h-8 text-white" />
                   </div>
-                  <div className="text-3xl font-black text-gray-800 mb-2">{item.stat}</div>
-                  <div className="text-sm font-bold text-gray-600">{item.label}</div>
+                  <div className="text-3xl font-black text-[#2C3E50] mb-2">{item.stat}</div>
+                  <div className="text-sm font-bold text-[#4A5568]">{item.label}</div>
                 </CardContent>
               </Card>
             ))}
@@ -744,45 +744,51 @@ export default function ListingLiftAI() {
                 title: "Competitor Spy Mode 🕵️",
                 description:
                   "See exactly what your competition is doing and steal their best strategies (legally, obvs)",
-                color: "from-cyan-500 to-blue-500",
-                borderColor: "border-cyan-400",
+                color: "from-[#4A5568] to-[#4A5568]",
+                borderColor: "border-[#4A5568]",
+                textColor: "text-white",
+                descColor: "text-[#4A5568]",
               },
               {
                 icon: Zap,
                 title: "AI That Actually Gets It 🤖",
                 description:
                   "Our AI speaks Amazon and knows what makes people click 'buy now' instead of scrolling past",
-                color: "from-orange-500 to-red-500",
-                borderColor: "border-orange-400",
+                color: "from-[#4A5568] to-[#4A5568]",
+                borderColor: "border-[#F5B041]",
+                textColor: "text-white",
+                descColor: "text-[#4A5568]",
               },
               {
                 icon: BarChart3,
                 title: "Instant Results ⚡",
                 description: "Watch your conversion rates go brrrr as soon as you implement our suggestions",
-                color: "from-green-500 to-emerald-500",
-                borderColor: "border-green-400",
+                color: "from-[#4A5568] to-[#4A5568]",
+                borderColor: "border-[#718096]",
+                textColor: "text-white",
+                descColor: "text-[#4A5568]",
               },
             ].map((feature, index) => (
               <Card
                 key={index}
                 className={`bg-white/95 backdrop-blur-sm border-4 ${feature.borderColor} shadow-2xl rounded-3xl overflow-hidden transform hover:scale-105 transition-all duration-300`}
               >
-                <CardHeader className={`bg-gradient-to-r ${feature.color} text-white p-6`}>
-                  <CardTitle className="flex items-center gap-3 text-xl font-black">
+                <CardHeader className={`bg-gradient-to-r ${feature.color} p-6`}>
+                  <CardTitle className={`flex items-center gap-3 text-xl font-black ${feature.textColor}`}>
                     <feature.icon className="w-6 h-6" />
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <p className="text-gray-700 font-medium text-lg">{feature.description}</p>
+                  <p className={`${feature.descColor} font-medium text-lg`}>{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
 
           {/* Testimonials */}
-          <Card className="bg-white/95 backdrop-blur-sm border-4 border-purple-400 shadow-2xl rounded-3xl overflow-hidden mb-16">
-            <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-8">
+          <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#4A5568] shadow-2xl rounded-3xl overflow-hidden mb-16">
+            <CardHeader className="bg-gradient-to-r from-[#4A5568] to-[#718096] text-white p-8">
               <CardTitle className="text-3xl font-black text-center">What Our Users Are Saying 💬</CardTitle>
             </CardHeader>
             <CardContent className="p-8">
@@ -812,7 +818,7 @@ export default function ListingLiftAI() {
                 ].map((testimonial, index) => (
                   <div
                     key={index}
-                    className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border-3 border-purple-200"
+                    className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-2xl border-3 border-[#718096]"
                   >
                     <div className="flex text-yellow-400 mb-3">
                       {[...Array(testimonial.rating)].map((_, i) => (
@@ -832,7 +838,7 @@ export default function ListingLiftAI() {
 
           {/* CTA Section */}
           <div className="text-center">
-            <Card className="bg-white/95 backdrop-blur-sm border-4 border-orange-400 shadow-2xl rounded-3xl overflow-hidden inline-block">
+            <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden inline-block">
               <CardContent className="p-12">
                 <h2 className="text-4xl font-black text-gray-800 mb-4">Ready to Become an Amazon Legend? 👑</h2>
                 <p className="text-xl text-gray-600 font-bold mb-8">
@@ -840,7 +846,7 @@ export default function ListingLiftAI() {
                 </p>
                 <Button
                   onClick={() => setCurrentPage("signup")}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-2xl px-12 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-orange-400"
+                  className="bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] hover:from-[#1A252F] hover:to-[#1A252F] text-white font-black text-2xl px-12 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-[#2C3E50]"
                   size="lg"
                   disabled={!listingData.asin || !listingData.heroKeyword || isAnalyzing}
                 >
@@ -866,30 +872,30 @@ export default function ListingLiftAI() {
 
   if (currentPage === "signup") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#F5B041] to-[#E67E22] relative overflow-hidden">
         <BackgroundPattern />
 
         <div className="container mx-auto px-4 py-8 relative z-10">
           <div className="max-w-md mx-auto">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-block p-6 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border-4 border-orange-500 mb-6">
-                <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 mb-2">
-                  ListingLift<span className="text-orange-600">.ai</span>
+              <div className="inline-block p-6 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border-4 border-[#2C3E50] mb-6">
+                <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#2C3E50] via-[#4A5568] to-[#718096] mb-2">
+                  ListingLift<span className="text-[#F5B041]">.ai</span>
                 </h1>
                 <p className="text-lg font-bold text-gray-700">Join the Revolution! ✨</p>
               </div>
             </div>
 
             {/* Signup Form */}
-            <Card className="bg-white/95 backdrop-blur-sm border-4 border-orange-400 shadow-2xl rounded-3xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-8">
+            <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] text-white p-8">
                 <CardTitle className="text-2xl font-black text-center flex items-center justify-center gap-2">
                   <Sparkles className="w-6 h-6" />
                   Create Your Account
                   <Fire className="w-6 h-6" />
                 </CardTitle>
-                <CardDescription className="text-orange-100 text-center font-medium">
+                <CardDescription className="text-white text-center font-medium">
                   Ready to make your listings absolutely iconic? 💅
                 </CardDescription>
               </CardHeader>
@@ -897,7 +903,7 @@ export default function ListingLiftAI() {
                 <form onSubmit={handleSignup} className="space-y-6">
                   <div className="space-y-3">
                     <Label htmlFor="email" className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                      <Mail className="w-5 h-5 text-orange-500" />
+                      <Mail className="w-5 h-5 text-[#F5B041]" />
                       Email Address
                     </Label>
                     <Input
@@ -906,14 +912,14 @@ export default function ListingLiftAI() {
                       placeholder="your.email@example.com"
                       value={authData.email}
                       onChange={(e) => setAuthData((prev) => ({ ...prev, email: e.target.value }))}
-                      className="text-lg p-4 border-3 border-orange-300 rounded-2xl focus:border-orange-500 focus:ring-4 focus:ring-orange-200 font-medium"
+                      className="text-lg p-4 border-3 border-[#718096] rounded-2xl focus:border-[#2C3E50] focus:ring-4 focus:ring-[#F5B041]/20 font-medium"
                       required
                     />
                   </div>
 
                   <div className="space-y-3">
                     <Label htmlFor="password" className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                      <Lock className="w-5 h-5 text-orange-500" />
+                      <Lock className="w-5 h-5 text-[#F5B041]" />
                       Password
                     </Label>
                     <Input
@@ -922,7 +928,7 @@ export default function ListingLiftAI() {
                       placeholder="Make it strong! 💪"
                       value={authData.password}
                       onChange={(e) => setAuthData((prev) => ({ ...prev, password: e.target.value }))}
-                      className="text-lg p-4 border-3 border-orange-300 rounded-2xl focus:border-orange-500 focus:ring-4 focus:ring-orange-200 font-medium"
+                      className="text-lg p-4 border-3 border-[#718096] rounded-2xl focus:border-[#2C3E50] focus:ring-4 focus:ring-[#F5B041]/20 font-medium"
                       required
                     />
                   </div>
@@ -936,7 +942,7 @@ export default function ListingLiftAI() {
                   <Button
                     type="submit"
                     disabled={authLoading}
-                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-xl px-8 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-orange-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] hover:from-[#1A252F] hover:to-[#1A252F] text-white font-black text-xl px-8 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-[#2C3E50] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {authLoading ? (
                       <>
@@ -955,7 +961,7 @@ export default function ListingLiftAI() {
                 <div className="mt-6 text-center space-y-2">
                   <button
                     onClick={() => setCurrentPage("login")}
-                    className="text-orange-600 hover:text-orange-700 font-bold underline"
+                    className="text-[#2C3E50] hover:text-[#1A252F] font-bold underline"
                   >
                     Already have an account? Sign in! 👋
                   </button>
@@ -997,30 +1003,30 @@ export default function ListingLiftAI() {
 
   if (currentPage === "login") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#F5B041] to-[#E67E22] relative overflow-hidden">
         <BackgroundPattern />
 
         <div className="container mx-auto px-4 py-8 relative z-10">
           <div className="max-w-md mx-auto">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-block p-6 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border-4 border-orange-500 mb-6">
-                <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 mb-2">
-                  ListingLift<span className="text-orange-600">.ai</span>
+              <div className="inline-block p-6 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border-4 border-[#2C3E50] mb-6">
+                <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#2C3E50] via-[#4A5568] to-[#718096] mb-2">
+                  ListingLift<span className="text-[#F5B041]">.ai</span>
                 </h1>
                 <p className="text-lg font-bold text-gray-700">Welcome Back! 👋</p>
               </div>
             </div>
 
             {/* Login Form */}
-            <Card className="bg-white/95 backdrop-blur-sm border-4 border-orange-400 shadow-2xl rounded-3xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-8">
+            <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] text-white p-8">
                 <CardTitle className="text-2xl font-black text-center flex items-center justify-center gap-2">
                   <Fire className="w-6 h-6" />
                   Sign In
                   <Sparkles className="w-6 h-6" />
                 </CardTitle>
-                <CardDescription className="text-orange-100 text-center font-medium">
+                <CardDescription className="text-white text-center font-medium">
                   Ready to optimize some listings? Let's go! 🚀
                 </CardDescription>
               </CardHeader>
@@ -1028,7 +1034,7 @@ export default function ListingLiftAI() {
                 <form onSubmit={handleLogin} className="space-y-6">
                   <div className="space-y-3">
                     <Label htmlFor="email" className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                      <Mail className="w-5 h-5 text-orange-500" />
+                      <Mail className="w-5 h-5 text-[#F5B041]" />
                       Email Address
                     </Label>
                     <Input
@@ -1037,14 +1043,14 @@ export default function ListingLiftAI() {
                       placeholder="your.email@example.com"
                       value={authData.email}
                       onChange={(e) => setAuthData((prev) => ({ ...prev, email: e.target.value }))}
-                      className="text-lg p-4 border-3 border-orange-300 rounded-2xl focus:border-orange-500 focus:ring-4 focus:ring-orange-200 font-medium"
+                      className="text-lg p-4 border-3 border-[#718096] rounded-2xl focus:border-[#2C3E50] focus:ring-4 focus:ring-[#F5B041]/20 font-medium"
                       required
                     />
                   </div>
 
                   <div className="space-y-3">
                     <Label htmlFor="password" className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                      <Lock className="w-5 h-5 text-orange-500" />
+                      <Lock className="w-5 h-5 text-[#F5B041]" />
                       Password
                     </Label>
                     <Input
@@ -1053,7 +1059,7 @@ export default function ListingLiftAI() {
                       placeholder="Your password"
                       value={authData.password}
                       onChange={(e) => setAuthData((prev) => ({ ...prev, password: e.target.value }))}
-                      className="text-lg p-4 border-3 border-orange-300 rounded-2xl focus:border-orange-500 focus:ring-4 focus:ring-orange-200 font-medium"
+                      className="text-lg p-4 border-3 border-[#718096] rounded-2xl focus:border-[#2C3E50] focus:ring-4 focus:ring-[#F5B041]/20 font-medium"
                       required
                     />
                   </div>
@@ -1067,7 +1073,7 @@ export default function ListingLiftAI() {
                   <Button
                     type="submit"
                     disabled={authLoading}
-                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-xl px-8 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-orange-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] hover:from-[#1A252F] hover:to-[#1A252F] text-white font-black text-xl px-8 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-[#2C3E50] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {authLoading ? (
                       <>
@@ -1086,7 +1092,7 @@ export default function ListingLiftAI() {
                 <div className="mt-6 text-center space-y-2">
                   <button
                     onClick={() => setCurrentPage("signup")}
-                    className="text-orange-600 hover:text-orange-700 font-bold underline"
+                    className="text-[#2C3E50] hover:text-[#1A252F] font-bold underline"
                   >
                     Don't have an account? Sign up! ✨
                   </button>
@@ -1108,24 +1114,24 @@ export default function ListingLiftAI() {
 
   // Main App (existing optimizer) - now with auth
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5B041] to-[#E67E22] relative overflow-hidden">
       <BackgroundPattern />
 
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Expanded Header Card */}
         <div className="w-full mb-8">
-          <div className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-3xl shadow-2xl border-4 border-orange-500 p-8 flex flex-col xl:flex-row gap-8 items-stretch relative">
+          <div className="w-full bg-gradient-to-r from-[#4A5568] to-[#4A5568] text-white rounded-3xl shadow-2xl border-4 border-[#4A5568] p-8 flex flex-col xl:flex-row gap-8 items-stretch relative">
             {/* Left Column: Branding & Quick Actions (1/3) */}
             <div className="flex flex-col justify-between xl:w-1/3 w-full">
               <div>
                 <div className="flex items-center gap-4 mb-2">
-                  <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-100 to-yellow-200 tracking-tight">
-                    ListingLift<span className="text-orange-200">.ai</span>
-                  </h1>
+                                  <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-[#F5B041] tracking-tight">
+                  ListingLift<span className="text-[#F5B041]">.ai</span>
+                </h1>
                   {user && (
                     <Button
                       onClick={handleLogout}
-                      className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-xl ml-2"
+                      className="bg-[#E67E22] hover:bg-[#D35400]  text-white p-2 rounded-xl ml-2"
                       size="sm"
                       aria-label="Logout"
                     >
@@ -1134,45 +1140,45 @@ export default function ListingLiftAI() {
                   )}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-5 h-5 text-orange-100" />
+                  <Sparkles className="w-5 h-5 text-[#F5B041]" />
                   <span className="text-xl font-bold text-white drop-shadow">Amazon Listing Optimizer</span>
-                  <Fire className="w-5 h-5 text-red-200" />
+                  <Fire className="w-5 h-5 text-[#F5B041]" />
                 </div>
-                <p className="text-md text-orange-50 max-w-2xl font-medium mb-2">
+                <p className="text-md text-white max-w-2xl font-medium mb-2">
                   Turn your boring listings into conversion machines with AI that actually gets it 🚀
                 </p>
                 {user && (
-                  <p className="text-xs text-orange-100 mt-2">Welcome back, {user.email}! 👋</p>
+                  <p className="text-xs text-white mt-2">Welcome back, {user.email}! 👋</p>
                 )}
               </div>
-              <div className="mt-6 border-t border-orange-200 pt-4">
-                <h2 className="text-lg font-black text-orange-100 mb-2">Quick Start Guide ⚡</h2>
+              <div className="mt-6 border-t border-[#718096] pt-4">
+                <h2 className="text-lg font-black text-white mb-2">Quick Start Guide ⚡</h2>
                 {/* Step-by-step instructional copy instead of buttons */}
                 <div className="mb-4">
                   {activeTab === "input" && (
-                    <div className="text-orange-50 font-medium text-md">
+                    <div className="text-white font-medium text-md">
                       Enter your product's ASIN and hero keyword to get started. We'll analyze your listing and competitors.<br />
                       <br />
                       Try loading sample data to see how it works!
                     </div>
                   )}
                   {activeTab === "optimize" && optimizeStep === "title" && (
-                    <div className="text-orange-50 font-medium text-md">
+                    <div className="text-white font-medium text-md">
                       Review your current title and explore AI-powered suggestions. Move through each section to optimize your listing.
                     </div>
                   )}
                   {activeTab === "optimize" && optimizeStep === "bullet" && (
-                    <div className="text-orange-50 font-medium text-md">
+                    <div className="text-white font-medium text-md">
                       Choose 5 bullet points. Use AI suggestions or competitor examples to make each one count.
                     </div>
                   )}
                   {activeTab === "optimize" && optimizeStep === "description" && (
-                    <div className="text-orange-50 font-medium text-md">
+                    <div className="text-white font-medium text-md">
                       Craft your product description with help from AI and competitor examples. Pick your favorite or combine ideas.
                     </div>
                   )}
                   {activeTab === "preview" && (
-                    <div className="text-orange-50 font-medium text-md">
+                    <div className="text-white font-medium text-md">
                       Here's how your optimized listing will appear. Copy your final listing attributes over to Seller Central for upload.
                     </div>
                   )}
@@ -1180,20 +1186,20 @@ export default function ListingLiftAI() {
               </div>
             </div>
             {/* Right Column: Keywords Section (2/3) */}
-            <div className="flex flex-col justify-between bg-white rounded-2xl p-6 border-2 border-orange-200 xl:w-2/3 w-full mt-8 xl:mt-0">
-              <h2 className="text-xl font-black text-orange-500 mb-4 flex items-center gap-2">
-                <BarChart3 className="w-6 h-6 text-orange-400" />
-                Keywords
+            <div className="flex flex-col justify-between bg-white rounded-2xl p-6 border-2 border-[#718096] xl:w-2/3 w-full mt-8 xl:mt-0">
+              <h2 className="text-xl font-black text-[#2C3E50] mb-4 flex items-center gap-2">
+                <BarChart3 className="w-6 h-6 text-[#F5B041]" />
+                Amazon Keywords
               </h2>
               {activeTab === "input" ? (
-                <div className="flex flex-col gap-4 p-4 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl border-2 border-orange-100 shadow-inner">
-                  <div className="text-lg font-bold text-orange-700">
+                <div className="flex flex-col gap-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-[#718096] shadow-inner">
+                  <div className="text-lg font-bold text-[#2C3E50]">
                     Our AI analyzes your product and your top competitors to uncover the exact keywords and phrases that drive clicks and sales on Amazon.
                   </div>
-                  <div className="text-md text-orange-800">
+                  <div className="text-md text-[#4A5568]">
                     We don't just guess—we use real data and advanced language models to identify what's missing, what's working, and what can set your listing apart.
                   </div>
-                  <ul className="list-disc list-inside text-orange-900 font-medium space-y-1 pl-2">
+                  <ul className="list-disc list-inside text-[#2C3E50] font-medium space-y-1 pl-2">
                     <li>
                       <span className="font-bold">A breakdown of high-value keywords</span> your listing should target
                     </li>
@@ -1204,28 +1210,12 @@ export default function ListingLiftAI() {
                       <span className="font-bold">Your top 10 strongest competitors' listing data</span>
                     </li>
                   </ul>
-                  <div className="text-md text-orange-700 font-semibold mt-2">
+                  <div className="text-md text-[#2C3E50] font-semibold mt-2">
                     Let our AI do the heavy lifting—so you can focus on growing your business!
                   </div>
                 </div>
               ) : (
                 <>
-                  <div className="absolute top-6 right-6">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-blue-400 text-blue-700 font-bold px-4 py-2 rounded-xl shadow"
-                      onClick={() => setShouldAnalyzeKeywords(true)}
-                      disabled={keywordGapLoading}
-                      aria-label="Re-analyze Keywords"
-                    >
-                      {keywordGapLoading ? (
-                        <span className="flex items-center gap-2"><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></span>Analyzing...</span>
-                      ) : (
-                        <>Re-analyze</>
-                      )}
-                    </Button>
-                  </div>
                   <div className="flex-1">
                     {keywordGapLoading && <div className="text-blue-600 font-bold">Analyzing keyword gaps...</div>}
                     {keywordGapError && <div className="text-red-600 font-bold">{keywordGapError}</div>}
@@ -1233,14 +1223,14 @@ export default function ListingLiftAI() {
                       <div className="space-y-4">
                         {/* High Value Gaps */}
                         <div>
-                          <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
-                            <Badge className="bg-blue-600 text-white text-xs font-black border-2 border-blue-900">High Value Gaps</Badge>
-                            <span className="text-xs text-blue-900">(Add these to your title!)</span>
+                          <div className="font-black text-md mb-1 flex items-center gap-2">
+                            <span className="text-black font-black">High Value Gaps</span>
+                            <span className="text-xs text-gray-500">(Add these to your title!)</span>
                           </div>
                           <div className="flex flex-wrap gap-2 mt-2">
                             {(keywordGapResult.high_value_gaps || []).length > 0 ? (
                               keywordGapResult.high_value_gaps.map((kw: string) => (
-                                <Badge key={kw} className="bg-blue-100 text-blue-800 border-blue-300 font-bold text-xs">{kw}</Badge>
+                                <Badge key={kw} className="bg-[#718096] text-white border-[#718096] font-bold text-xs">{kw}</Badge>
                               ))
                             ) : (
                               <span className="text-xs text-gray-500">No high value gaps found.</span>
@@ -1249,14 +1239,14 @@ export default function ListingLiftAI() {
                         </div>
                         {/* Missing Keywords */}
                         <div>
-                          <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
-                            <Badge className="bg-cyan-600 text-white text-xs font-black border-2 border-cyan-900">Missing Keywords</Badge>
-                            <span className="text-xs text-cyan-900">(From competitors, not in your title)</span>
+                          <div className="font-black text-md mb-1 flex items-center gap-2">
+                            <span className="text-black font-black">Missing Keywords</span>
+                            <span className="text-xs text-gray-500">(From competitors, not in your title)</span>
                           </div>
                           <div className="flex flex-wrap gap-2 mt-2">
                             {(keywordGapResult.missing_keywords || []).length > 0 ? (
                               keywordGapResult.missing_keywords.map((kw: any, i: number) => (
-                                <Badge key={kw.keyword + i} className="bg-cyan-100 text-cyan-800 border-cyan-300 font-bold text-xs">{kw.keyword}</Badge>
+                                <Badge key={kw.keyword + i} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw.keyword}</Badge>
                               ))
                             ) : (
                               <span className="text-xs text-gray-500">No missing keywords found.</span>
@@ -1265,13 +1255,13 @@ export default function ListingLiftAI() {
                         </div>
                         {/* Our Existing Keywords */}
                         <div>
-                          <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
-                            <Badge className="bg-green-600 text-white text-xs font-black border-2 border-green-900">Your Title Keywords</Badge>
+                          <div className="font-black text-md mb-1 flex items-center gap-2">
+                            <span className="text-black font-black">Your Title Keywords</span>
                           </div>
                           <div className="flex flex-wrap gap-2 mt-2">
                             {(keywordGapResult.our_existing_keywords || []).length > 0 ? (
                               keywordGapResult.our_existing_keywords.map((kw: string) => (
-                                <Badge key={kw} className="bg-green-100 text-green-800 border-green-300 font-bold text-xs">{kw}</Badge>
+                                <Badge key={kw} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw}</Badge>
                               ))
                             ) : (
                               <span className="text-xs text-gray-500">No keywords found in your title.</span>
@@ -1288,24 +1278,24 @@ export default function ListingLiftAI() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-white/90 backdrop-blur-sm p-2 rounded-2xl shadow-xl border-4 border-orange-400">
+          <TabsList className="grid w-full grid-cols-3 mb-8 bg-white/90 backdrop-blur-sm p-2 rounded-2xl shadow-xl border-4 border-[#718096]">
             <TabsTrigger
               value="input"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white font-bold rounded-xl transition-all duration-300 data-[state=active]:shadow-lg data-[state=active]:scale-105"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#2C3E50] data-[state=active]:to-[#2C3E50] data-[state=active]:text-white font-bold rounded-xl transition-all duration-300 data-[state=active]:shadow-lg data-[state=active]:scale-105"
             >
               <Target className="w-5 h-5" />
               Input Data
             </TabsTrigger>
             <TabsTrigger
               value="optimize"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white font-bold rounded-xl transition-all duration-300 data-[state=active]:shadow-lg data-[state=active]:scale-105"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#2C3E50] data-[state=active]:to-[#2C3E50] data-[state=active]:text-white font-bold rounded-xl transition-all duration-300 data-[state=active]:shadow-lg data-[state=active]:scale-105"
             >
               <Zap className="w-5 h-5" />
               Optimize
             </TabsTrigger>
             <TabsTrigger
               value="preview"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white font-bold rounded-xl transition-all duration-300 data-[state=active]:shadow-lg data-[state=active]:scale-105"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#2C3E50] data-[state=active]:to-[#2C3E50] data-[state=active]:text-white font-bold rounded-xl transition-all duration-300 data-[state=active]:shadow-lg data-[state=active]:scale-105"
             >
               <TrendingUp className="w-5 h-5" />
               Preview
@@ -1330,13 +1320,13 @@ export default function ListingLiftAI() {
           )}
 
           <TabsContent value="input" className="space-y-6">
-            <Card className="bg-white/95 backdrop-blur-sm border-4 border-orange-400 shadow-2xl rounded-3xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-8">
+            <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-[#718096] to-[#718096] text-white p-8">
                 <CardTitle className="text-3xl font-black flex items-center gap-3">
                   <Rocket className="w-8 h-8" />
                   Let's Get This Bread! 🍞
                 </CardTitle>
-                <CardDescription className="text-orange-100 text-lg font-medium">
+                <CardDescription className="text-white text-lg font-medium">
                   Just drop your ASIN and hero keyword - we'll handle the rest ✨
                 </CardDescription>
               </CardHeader>
@@ -1344,7 +1334,7 @@ export default function ListingLiftAI() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
                   <div className="space-y-3">
                     <Label htmlFor="asin" className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                      <Target className="w-5 h-5 text-orange-500" />
+                      <Target className="w-5 h-5 text-[#F5B041]" />
                       Your Product ASIN
                     </Label>
                     <Input
@@ -1352,7 +1342,7 @@ export default function ListingLiftAI() {
                       placeholder="B08N5WRWNW"
                       value={listingData.asin}
                       onChange={(e) => setListingData((prev) => ({ ...prev, asin: e.target.value }))}
-                      className="text-lg p-4 border-3 border-orange-300 rounded-2xl focus:border-orange-500 focus:ring-4 focus:ring-orange-200 font-medium"
+                      className="text-lg p-4 border-3 border-[#718096] rounded-2xl focus:border-[#2C3E50] focus:ring-4 focus:ring-[#F5B041]/20 font-medium"
                     />
                     <p className="text-sm text-gray-600 font-medium">
                       That 10-character Amazon code that identifies your product 🎯
@@ -1361,7 +1351,7 @@ export default function ListingLiftAI() {
 
                   <div className="space-y-3">
                     <Label htmlFor="heroKeyword" className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                      <Fire className="w-5 h-5 text-red-500" />
+                      <Fire className="w-5 h-5 text-[#F5B041]" />
                       Hero Keyword
                     </Label>
                     <Input
@@ -1369,7 +1359,7 @@ export default function ListingLiftAI() {
                       placeholder="wireless bluetooth headphones"
                       value={listingData.heroKeyword}
                       onChange={(e) => setListingData((prev) => ({ ...prev, heroKeyword: e.target.value }))}
-                      className="text-lg p-4 border-3 border-orange-300 rounded-2xl focus:border-orange-500 focus:ring-4 focus:ring-orange-200 font-medium"
+                      className="text-lg p-4 border-3 border-[#718096] rounded-2xl focus:border-[#2C3E50] focus:ring-4 focus:ring-[#F5B041]/20 font-medium"
                     />
                     <p className="text-sm text-gray-600 font-medium">The main keyword that's gonna make you rich 💰</p>
                   </div>
@@ -1377,7 +1367,7 @@ export default function ListingLiftAI() {
 
                 <div className="flex flex-col md:flex-row items-center justify-center gap-4 pt-4">
                   <Button
-                    className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl border-2 border-blue-400 text-md md:text-lg px-6 py-4 md:px-8 md:py-6"
+                    className="bg-gradient-to-r from-[#4A5568] to-[#4A5568] hover:from-[#2C3E50] hover:to-[#2C3E50] text-white font-bold rounded-xl border-2 border-[#4A5568] text-md md:text-lg px-6 py-4 md:px-8 md:py-6"
                     onClick={handleLoadSampleData}
                     type="button"
                   >
@@ -1389,7 +1379,7 @@ export default function ListingLiftAI() {
                       console.log("[UI] Generate AI Magic button clicked", { asin: listingData.asin, heroKeyword: listingData.heroKeyword })
                       generateSuggestions()
                     }}
-                    className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-xl px-12 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-orange-400 hover:border-orange-300"
+                    className="bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] hover:from-[#1A252F] hover:to-[#1A252F] text-white font-black text-xl px-12 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-[#2C3E50] hover:border-[#1A252F]"
                     size="lg"
                     disabled={!listingData.asin || !listingData.heroKeyword || isAnalyzing}
                   >
@@ -1414,28 +1404,28 @@ export default function ListingLiftAI() {
             {optimizeStep === "description" ? (
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Column 1: Your Description(s) */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
-                    <CardTitle className="text-xl font-black">Your Description</CardTitle>
-                    <CardDescription className="text-green-100 font-medium">
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-[#718096] to-[#718096] text-white p-6">
+                    <CardTitle className="text-xl font-black">Your Current Description</CardTitle>
+                    <CardDescription className="text-white font-medium">
                       Time to make your listing absolutely iconic 💅
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-6">
                     {descriptionDrafts.map((desc, idx) => (
-                      <div key={idx} className={`flex flex-col gap-1 mb-4 border-2 rounded-xl ${chosenDescriptionIdx === idx ? 'border-green-500 bg-green-50' : 'border-green-300 bg-white'}`}>
+                                              <div key={idx} className={`flex flex-col gap-1 mb-4 border-2 rounded-xl ${chosenDescriptionIdx === idx ? 'border-green-500 bg-gradient-to-br from-gray-50 to-gray-200' : ' bg-gradient-to-br from-gray-50 to-gray-200'}`}>
                         <SpellcheckTextarea
-                          rows={10}
+                          rows={11}
                           value={desc}
                           onChange={value => setDescriptionDrafts(prev => prev.map((d, i) => i === idx ? value : d))}
-                          className="rounded-xl flex-1 bg-transparent"
+                          className="border-3 border-[#718096] rounded-2xl focus:border-[#334155] focus:ring-4 focus:ring-[#718096]/20 font-medium w-full"
                           placeholder={`Description ${idx + 1}`}
                         />
                         <div className="flex gap-2 mt-1 justify-end">
                           <Button
                             type="button"
                             size="sm"
-                            className={`font-bold border-2 rounded-xl ${chosenDescriptionIdx === idx ? 'bg-green-500 text-white border-green-700' : 'bg-green-100 text-green-700 border-green-400'}`}
+                            className={`font-bold border-2 rounded-xl ${chosenDescriptionIdx === idx ? 'bg-[#334155] text-white border-[#334155]' : 'bg-[#718096]/20 text-[#334155] border-[#334155]'}`}
                             onClick={() => setChosenDescriptionIdx(idx)}
                           >
                             ^ Choose Description
@@ -1444,7 +1434,7 @@ export default function ListingLiftAI() {
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="font-bold border-2 border-red-400 text-red-700 rounded-xl bg-white hover:bg-red-50"
+                            className="font-bold border-2 border-[#DC2626] text-[#DC2626] rounded-xl bg-gradient-to-br from-gray-50 to-gray-200 hover:bg-red-50"
                             onClick={() => {
                               setDescriptionDrafts(prev => prev.filter((_, i) => i !== idx))
                               if (chosenDescriptionIdx === idx) setChosenDescriptionIdx(null)
@@ -1461,14 +1451,14 @@ export default function ListingLiftAI() {
                       type="button"
                       size="sm"
                       variant="outline"
-                      className="border-green-400 text-green-700"
+                      className="bg-[#718096] text-[#334155] border-[#718096] hover:bg-[#5F6C81] hover:text-white"
                       onClick={() => setDescriptionDrafts(prev => [...prev, ""])}
                     >
                       +
                     </Button>
                     <Button
                       type="button"
-                      className="bg-green-500 text-white font-bold rounded-xl mt-4 w-full"
+                      className="bg-[#334155] hover:bg-[#1E293B] text-white font-bold rounded-xl mt-4 w-full"
                       onClick={() => { setPreviewMode(true); setActiveTab('preview'); }}
                     >
                       Next Step: Preview
@@ -1476,20 +1466,20 @@ export default function ListingLiftAI() {
                   </CardContent>
                 </Card>
                 {/* Column 2: AI Description Suggestions */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-yellow-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-[#718096] to-[#718096] text-white p-6">
                     <CardTitle className="flex items-center gap-2 text-xl font-black">
                       <Lightbulb className="w-6 h-6" />
                       AI Description Suggestions
                     </CardTitle>
-                    <CardDescription className="text-yellow-100 font-medium">
+                    <CardDescription className="text-white font-medium">
                       Your personal conversion coach is here! 🚀
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     <Button
                       type="button"
-                      className="w-full text-xs font-bold bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700 border-2 border-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
+                      className="w-full text-xs font-bold bg-gradient-to-r from-[#334155] to-[#334155] hover:from-[#1E293B] hover:to-[#1E293B] border-2 border-[#334155] text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
                       onClick={async () => {
                         setDescriptionIdeasLoading(true)
                         setDescriptionIdeasError("")
@@ -1532,12 +1522,12 @@ export default function ListingLiftAI() {
                     {descriptionIdeas && (
                       <div className="space-y-4">
                         {descriptionIdeas.map((idea, idx) => (
-                          <div key={idx} className="border-3 border-blue-400 rounded-2xl p-4 space-y-2 bg-gradient-to-br from-blue-50 to-blue-200 shadow-lg flex flex-col">
+                          <div key={idx} className="border-3 border-blue-400 rounded-2xl p-4 space-y-2 bg-gradient-to-br from-gray-50 to-gray-200 shadow-lg flex flex-col">
                             <div className="font-bold text-md text-gray-900 mb-2">{idea}</div>
                             <div className="flex gap-2 mt-2">
                               <Button
                                 size="sm"
-                                className="bg-green-500 hover:bg-green-600 text-white font-bold border-2 border-green-700 rounded-xl shadow"
+                                className="bg-[#334155] hover:bg-[#1E293B] text-white font-bold border-2 border-[#334155] rounded-xl shadow"
                                 onClick={() => {
                                   setDescriptionDrafts(prev => [...prev, idea])
                                   setChosenDescriptionIdx(descriptionDrafts.length)
@@ -1548,7 +1538,7 @@ export default function ListingLiftAI() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-red-400 text-red-700 font-bold rounded-xl shadow"
+                                className="border-[#DC2626] text-[#DC2626] font-bold rounded-xl shadow"
                                 onClick={() => setDescriptionIdeas(prev => prev ? prev.filter((_, i) => i !== idx) : prev)}
                               >
                                 Reject
@@ -1567,23 +1557,23 @@ export default function ListingLiftAI() {
                   </CardContent>
                 </Card>
                 {/* Column 3: Competitor Descriptions */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-[#718096] to-[#718096] text-white p-6">
                     <CardTitle className="flex items-center gap-2 text-xl font-black">
                       <Target className="w-6 h-6" />
                       Competitor Descriptions
                     </CardTitle>
-                    <CardDescription className="text-cyan-100 font-medium">
+                    <CardDescription className="text-white font-medium">
                       Spying on the competition for "{listingData.heroKeyword}" 👀
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     {competitorDetails.map((comp, idx) => (
-                      <div key={comp.asin || idx} className="mb-4 border-2 border-cyan-200 rounded-xl p-3">
-                        <div className="font-bold text-cyan-800 mb-1">{comp.title || <span className="italic text-gray-400">No title</span>}</div>
+                      <div key={comp.asin || idx} className="mb-4 border-2 border-gray-200 rounded-xl p-3 bg-gradient-to-br from-gray-50 to-gray-200">
+                        <div className="font-bold text-gray-800 mb-1">{comp.title || <span className="italic text-gray-400">No title</span>}</div>
                         <div className="mb-1">
-                          <span className="font-bold text-cyan-600 text-xs">Description:</span>
-                          <div className="text-xs text-gray-700 bg-cyan-50 rounded px-2 py-1 border border-cyan-100 mt-1 whitespace-pre-wrap">
+                          <span className="font-bold text-gray-600 text-xs">Description:</span>
+                          <div className="text-xs text-gray-700 bg-white rounded px-2 py-1 border border-gray-200 mt-1 whitespace-pre-wrap">
                             {comp.description ? comp.description : <span className="text-gray-400 italic">No description found.</span>}
                           </div>
                         </div>
@@ -1595,10 +1585,10 @@ export default function ListingLiftAI() {
             ) : optimizeStep === "bullet" ? (
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Column 1: Current Bullet Points */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
-                    <CardTitle className="text-xl font-black">Your Bullet Points (Choose 5)</CardTitle>
-                    <CardDescription className="text-green-100 font-medium">
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-[#718096] to-[#718096] text-white p-6">
+                    <CardTitle className="text-xl font-black">Your Current Bullet Points (Choose 5)</CardTitle>
+                    <CardDescription className="text-white font-medium">
                       Time to make your listing absolutely iconic 💅
                     </CardDescription>
                   </CardHeader>
@@ -1610,24 +1600,24 @@ export default function ListingLiftAI() {
                         return (
                           <div
                             key={idx}
-                            className={`flex flex-col gap-1 mb-4 border-2 rounded-xl ${isSelected ? 'border-green-500 bg-green-50' : 'border-green-300 bg-white'}`}
+                            className={`flex flex-col gap-1 mb-4 border-2 rounded-xl ${isSelected ? 'border-green-500 bg-gradient-to-br from-gray-50 to-gray-200' : 'bg-gradient-to-br from-gray-50 to-gray-200'}`}
                           >
                             <SpellcheckTextarea
-                              rows={2}
+                              rows={5}
                               value={bp}
                               onChange={value => setListingData(prev => {
                                 const newBullets = [...prev.bulletPoints]
                                 newBullets[idx] = value
                                 return { ...prev, bulletPoints: newBullets }
                               })}
-                              className="rounded-xl flex-1 bg-transparent"
+                              className="border-3 border-[#718096] rounded-2xl focus:border-[#334155] focus:ring-4 focus:ring-[#718096]/20 font-medium w-full"
                               placeholder={`Bullet Point ${idx + 1}`}
                             />
                             <div className="flex gap-2 mt-1 justify-end">
                               <Button
                                 type="button"
                                 size="sm"
-                                className={`font-bold border-2 rounded-xl ${isSelected ? 'bg-green-500 text-white border-green-700' : 'bg-green-100 text-green-700 border-green-400'}`}
+                                className={`font-bold border-2 rounded-xl ${isSelected ? 'bg-[#334155] text-white border-[#334155]' : 'bg-[#718096]/20 text-[#334155] border-[#334155]'}`}
                                 onClick={() => {
                                   setChosenBulletIdxs(prev => {
                                     if (isSelected) {
@@ -1647,7 +1637,7 @@ export default function ListingLiftAI() {
                                 type="button"
                                 size="sm"
                                 variant="outline"
-                                className="font-bold border-2 border-red-400 text-red-700 rounded-xl bg-white hover:bg-red-50"
+                                className="font-bold border-2 border-[#DC2626] text-[#DC2626] rounded-xl bg-gradient-to-br from-gray-50 to-gray-200 hover:bg-red-50"
                                 onClick={() => setListingData(prev => {
                                   const newBullets = prev.bulletPoints.filter((_, i) => i !== idx)
                                   // Update chosenBulletIdxs: remove idx, decrement indices > idx
@@ -1665,13 +1655,13 @@ export default function ListingLiftAI() {
                           </div>
                         )
                       })}
-                      <Button type="button" size="sm" variant="outline" className="border-green-400 text-green-700" onClick={() => setListingData(prev => ({ ...prev, bulletPoints: [...prev.bulletPoints, ""] }))}>
+                      <Button type="button" size="sm" variant="outline" className="bg-[#718096] text-[#334155] border-[#718096] hover:bg-[#5F6C81] hover:text-white" onClick={() => setListingData(prev => ({ ...prev, bulletPoints: [...prev.bulletPoints, ""] }))}>
                         + Add Bullet Point
                       </Button>
                       {optimizeStep === "bullet" && (
                         <Button
                           type="button"
-                          className="bg-green-500 text-white font-bold rounded-xl mt-4 w-full"
+                          className="bg-[#334155] hover:bg-[#1E293B] text-white font-bold rounded-xl mt-4 w-full"
                           onClick={() => setOptimizeStep("description")}
                           disabled={chosenBulletIdxs.length !== 5}
                         >
@@ -1682,20 +1672,20 @@ export default function ListingLiftAI() {
                   </CardContent>
                 </Card>
                 {/* Column 2: AI Suggestions & Gap Analysis */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-yellow-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-[#718096] to-[#718096] text-white p-6">
                     <CardTitle className="flex items-center gap-2 text-xl font-black">
                       <Lightbulb className="w-6 h-6" />
                       AI Bullet Point Suggestions
                     </CardTitle>
-                    <CardDescription className="text-yellow-100 font-medium">
+                    <CardDescription className="text-white font-medium">
                       Your personal conversion coach is here! 🚀
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     <Button
                       type="button"
-                      className="w-full text-xs font-bold bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700 border-2 border-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
+                      className="w-full text-xs font-bold bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] hover:from-[#1A252F] hover:to-[#1A252F] border-2 border-[#2C3E50] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
                       onClick={async () => {
                         setBulletIdeasLoading(true)
                         setBulletIdeasError("")
@@ -1739,12 +1729,12 @@ export default function ListingLiftAI() {
                     {bulletIdeas && (
                       <div className="space-y-4">
                         {bulletIdeas.map((idea, idx) => (
-                          <div key={idx} className="border-3 border-blue-400 rounded-2xl p-4 space-y-2 bg-gradient-to-br from-blue-50 to-blue-200 shadow-lg flex flex-col">
+                          <div key={idx} className="border-3 border-blue-400 rounded-2xl p-4 space-y-2 bg-gradient-to-br from-gray-50 to-gray-200 shadow-lg flex flex-col">
                             <div className="font-bold text-md text-gray-900 mb-2">{idea}</div>
                             <div className="flex gap-2 mt-2">
                               <Button
                                 size="sm"
-                                className="bg-green-500 hover:bg-green-600 text-white font-bold border-2 border-green-700 rounded-xl shadow"
+                                className="bg-[#334155] hover:bg-[#1E293B] text-white font-bold border-2 border-[#334155] rounded-xl shadow"
                                 onClick={() => {
                                   setListingData(prev => ({ ...prev, bulletPoints: [...prev.bulletPoints, idea] }))
                                   setBulletIdeas(prev => prev ? prev.filter((_, i) => i !== idx) : prev)
@@ -1755,7 +1745,7 @@ export default function ListingLiftAI() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-red-400 text-red-700 font-bold rounded-xl shadow"
+                                className="border-[#DC2626] text-[#DC2626] font-bold rounded-xl shadow"
                                 onClick={() => setBulletIdeas(prev => prev ? prev.filter((_, i) => i !== idx) : prev)}
                               >
                                 Reject
@@ -1774,27 +1764,27 @@ export default function ListingLiftAI() {
                   </CardContent>
                 </Card>
                 {/* Column 3: Competitor Bullet Points */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-[#718096] to-[#718096] text-white p-6">
                     <CardTitle className="flex items-center gap-2 text-xl font-black">
                       <Target className="w-6 h-6" />
                       Competitor Bullet Points
                     </CardTitle>
-                    <CardDescription className="text-cyan-100 font-medium">
+                    <CardDescription className="text-white font-medium">
                       Spying on the competition for "{listingData.heroKeyword}" 👀
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     {/* Show top 10 competitors' bullet points only (no description) */}
                     {competitorDetails.map((comp, idx) => (
-                      <div key={comp.asin || idx} className="mb-4 border-2 border-cyan-200 rounded-xl p-3">
-                        <div className="font-bold text-cyan-800 mb-1">{comp.title || <span className="italic text-gray-400">No title</span>}</div>
+                      <div key={comp.asin || idx} className="mb-4 border-2 border-gray-200 rounded-xl p-3 bg-gradient-to-br from-gray-50 to-gray-200">
+                        <div className="font-bold text-gray-800 mb-1">{comp.title || <span className="italic text-gray-400">No title</span>}</div>
                         <div className="mb-1">
-                          <span className="font-bold text-cyan-600 text-xs">Bullet Points:</span>
+                          <span className="font-bold text-gray-600 text-xs">Bullet Points:</span>
                           <ul className="ml-4 mt-1 space-y-1">
                             {(comp.bullet_points || "").split("\n").filter(Boolean).length > 0 ? (
                               (comp.bullet_points || "").split("\n").filter(Boolean).map((bp: string, i: number) => (
-                                <li key={i} className="text-xs text-gray-700 bg-cyan-50 rounded px-2 py-1 border border-cyan-100">• {bp}</li>
+                                <li key={i} className="text-xs text-gray-700 bg-white rounded px-2 py-1 border border-gray-200">• {bp}</li>
                               ))
                             ) : (
                               <li className="text-xs text-gray-400 italic">No bullet points found.</li>
@@ -1809,10 +1799,10 @@ export default function ListingLiftAI() {
             ) : (
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Editable Content - Left Column */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-green-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
-                    <CardTitle className="text-xl font-black">Your Current Title</CardTitle>
-                    <CardDescription className="text-green-100 font-medium">
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-[#718096] to-[#718096] text-white p-6">
+                    <CardTitle className="text-xl font-black">Your Current Listing Title</CardTitle>
+                    <CardDescription className="text-white font-medium">
                       Time to make your listing absolutely iconic 💅
                     </CardDescription>
                   </CardHeader>
@@ -1822,7 +1812,7 @@ export default function ListingLiftAI() {
                         <Sparkles className="w-4 h-4 text-green-500" />
                         Current Title
                       </Label>
-                      <div className={`bg-green-50 border-2 rounded-xl p-4 font-bold text-gray-800 mb-4 ${chosenTitleIdx === null ? 'border-green-500 ring-2 ring-green-400' : 'border-green-200'}`}
+                      <div className={`bg-gradient-to-br from-gray-50 to-gray-200 border-2 rounded-xl p-4 font-bold text-gray-800 mb-4 ${chosenTitleIdx === null ? 'border-green-500 ring-2 ring-green-400' : 'border-green-200'}`}
                       >
                         {titles[0] || listingData.title || <span className="italic text-gray-400">No title yet</span>}
                       </div>
@@ -1840,13 +1830,13 @@ export default function ListingLiftAI() {
                             placeholder="Make it pop! Front-load your keyword and add some spice... 🌶️"
                             value={title}
                             onChange={value => updateTitle(idx + 1, value)}
-                            className="border-3 border-green-300 rounded-2xl focus:border-green-500 focus:ring-4 focus:ring-green-200 font-medium w-full"
+                            className="border-3 border-[#718096] rounded-2xl focus:border-[#334155] focus:ring-4 focus:ring-[#718096]/20 font-medium w-full"
                           />
                           <div className="flex gap-2 mt-2 justify-end">
                             <Button
                               type="button"
                               size="sm"
-                              className={`font-bold border-2 rounded-xl ${chosenTitleIdx === idx + 1 ? 'bg-green-500 text-white border-green-700' : 'border-green-400 text-green-700 bg-white hover:bg-green-50'}`}
+                              className={`font-bold border-2 rounded-xl ${chosenTitleIdx === idx + 1 ? 'bg-[#334155] text-white border-[#334155]' : 'bg-[#718096]/20 text-[#334155] border-[#334155]'}`}
                               onClick={() => handleChooseTitle(idx + 1)}
                             >
                               ^ Choose Title
@@ -1855,7 +1845,7 @@ export default function ListingLiftAI() {
                               type="button"
                               size="sm"
                               variant="outline"
-                              className="font-bold border-2 border-red-400 text-red-700 rounded-xl bg-white hover:bg-red-50"
+                              className="font-bold border-2 border-[#DC2626] text-[#DC2626] rounded-xl bg-gradient-to-br from-gray-50 to-gray-200 hover:bg-red-50"
                               onClick={() => removeTitle(idx + 1)}
                               aria-label="Delete title"
                             >
@@ -1869,6 +1859,7 @@ export default function ListingLiftAI() {
                           type="button"
                           variant="outline"
                           size="sm"
+                          className="border-[#718096] text-[#718096] hover:bg-[#718096] hover:text-white"
                           onClick={addTitle}
                           aria-label="Add another title"
                         >
@@ -1877,7 +1868,7 @@ export default function ListingLiftAI() {
                         <Button
                           type="button"
                           size="sm"
-                          className="font-bold border-2 rounded-xl bg-blue-100 text-blue-700 border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="font-bold border-2 rounded-xl bg-[#334155] text-white border-[#334155] hover:bg-[#1E293B] disabled:opacity-50 disabled:cursor-not-allowed"
                           disabled={!hasChosenTitleThisSession || bulletLoading}
                           onClick={async () => {
                             setBulletLoading(true)
@@ -1953,13 +1944,13 @@ export default function ListingLiftAI() {
                 </Card>
 
                 {/* AI Suggestions - Middle Column */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-yellow-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-[#718096] to-[#718096] text-white p-6">
                     <CardTitle className="flex items-center gap-2 text-xl font-black">
                       <Lightbulb className="w-6 h-6" />
-                      AI Suggestions
+                      AI Title Suggestions
                     </CardTitle>
-                    <CardDescription className="text-yellow-100 font-medium">
+                    <CardDescription className="text-white font-medium">
                       Your personal conversion coach is here! 🚀
                     </CardDescription>
                   </CardHeader>
@@ -1969,7 +1960,7 @@ export default function ListingLiftAI() {
                       <Button
                         onClick={fetchGptSuggestion}
                         disabled={gptLoading || !titles[0] || competitors.length === 0}
-                        className="w-full text-xs font-bold bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700 border-2 border-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
+                        className="w-full text-xs font-bold bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] hover:from-[#1A252F] hover:to-[#1A252F] border-2 border-[#2C3E50] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mb-2"
                       >
                         {gptLoading ? (
                           <>
@@ -2003,13 +1994,13 @@ export default function ListingLiftAI() {
                             <div className="flex gap-2 text-xs font-bold">
                               <span className="bg-green-100 text-green-700 rounded px-2 py-1">CTR: {sugg.ctr_increase}</span>
                               <span className="bg-blue-100 text-blue-700 rounded px-2 py-1">CR: {sugg.cr_increase}</span>
-                              <span className="bg-yellow-100 text-yellow-700 rounded px-2 py-1">Priority: {sugg.priority}</span>
+                              <span className="bg-[#F5B041]/20 text-[#2C3E50] rounded px-2 py-1">Priority: {sugg.priority}</span>
                             </div>
                             <div className="text-xs text-gray-700 font-medium mt-1">{sugg.justification}</div>
                             <div className="flex gap-2 mt-2">
                               <Button
                                 size="sm"
-                                className="bg-green-500 hover:bg-green-600 text-white font-bold border-2 border-green-700 rounded-xl shadow"
+                                className="bg-[#334155] hover:bg-[#1E293B] text-white font-bold border-2 border-[#334155] rounded-xl shadow"
                                 onClick={() => handleAcceptSuggestion(sugg.title)}
                               >
                                 Accept
@@ -2017,7 +2008,7 @@ export default function ListingLiftAI() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-red-400 text-red-700 font-bold rounded-xl shadow"
+                                className="border-[#DC2626] text-[#DC2626] font-bold rounded-xl shadow"
                                 onClick={() => handleRejectSuggestion(idx)}
                               >
                                 Reject
@@ -2036,7 +2027,7 @@ export default function ListingLiftAI() {
                       suggestions.map((suggestion, index) => (
                         <div
                           key={index}
-                          className="border-3 border-yellow-200 rounded-2xl p-4 space-y-3 bg-gradient-to-br from-yellow-50 to-orange-50 hover:shadow-lg transition-all duration-300"
+                          className="border-3 border-[#F5B041] rounded-2xl p-4 space-y-3 bg-gradient-to-br from-[#F5B041]/10 to-[#F5B041]/20 hover:shadow-lg transition-all duration-300"
                         >
                           <div className="flex items-center justify-between">
                             <Badge
@@ -2051,7 +2042,7 @@ export default function ListingLiftAI() {
                                 suggestion.impact === "high"
                                   ? "bg-red-500 border-red-400"
                                   : suggestion.impact === "medium"
-                                    ? "bg-orange-500 border-orange-400"
+                                    ? "bg-[#F5B041] border-[#F5B041]"
                                     : "bg-gray-500 border-gray-400"
                               }`}
                             >
@@ -2063,7 +2054,7 @@ export default function ListingLiftAI() {
                             </Badge>
                             <Badge
                               variant="outline"
-                              className="text-xs font-bold border-2 border-yellow-400 text-yellow-600"
+                              className="text-xs font-bold border-2 border-[#F5B041] text-[#2C3E50]"
                             >
                               {suggestion.type === "title"
                                 ? "📝 TITLE"
@@ -2077,7 +2068,7 @@ export default function ListingLiftAI() {
                           <Button
                             size="sm"
                             onClick={() => applySuggestion(suggestion)}
-                            className="w-full text-xs font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 border-2 border-yellow-400 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                            className="w-full text-xs font-bold bg-gradient-to-r from-[#F5B041] to-[#F5B041] hover:from-[#E8A133] hover:to-[#E8A133] border-2 border-[#F5B041] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                           >
                             Apply This Fire 🔥
                           </Button>
@@ -2088,13 +2079,13 @@ export default function ListingLiftAI() {
                 </Card>
 
                 {/* Competitor Analysis - Right Column */}
-                <Card className="bg-white/95 backdrop-blur-sm border-4 border-cyan-400 shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6">
+                <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#718096] shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-[#718096] to-[#718096] text-white p-6">
                     <CardTitle className="flex items-center gap-2 text-xl font-black">
                       <Target className="w-6 h-6" />
-                      Competitor Intel 
+                      Competitor Titles 
                     </CardTitle>
-                    <CardDescription className="text-cyan-100 font-medium">
+                    <CardDescription className="text-white font-medium">
                       Spying on the competition for "{listingData.heroKeyword}" 👀
                     </CardDescription>
                   </CardHeader>
@@ -2114,16 +2105,10 @@ export default function ListingLiftAI() {
                         {competitors.map((comp, idx) => (
                           <div
                             key={comp.asin}
-                            className="border-3 border-cyan-200 rounded-2xl p-4 flex flex-col gap-2 bg-gradient-to-br from-cyan-50 to-blue-50 hover:shadow-lg transition-all duration-300"
+                            className="border-2 border-gray-200 rounded-2xl p-4 flex flex-col gap-2 bg-gradient-to-br from-gray-50 to-gray-200 hover:shadow-lg transition-all duration-300"
                           >
                             <div className="flex items-center justify-between">
                               <h4 className="font-black text-sm text-gray-800 break-words whitespace-normal w-full">{comp.title}</h4>
-                              <Badge
-                                variant="outline"
-                                className="text-xs font-bold border-2 border-cyan-400 text-cyan-600"
-                              >
-                                🏆 Rank #{comp.position}
-                              </Badge>
                             </div>
                             <div className="flex items-center gap-4 text-xs text-gray-700 font-medium">
                               <span>Reviews: <span className="font-black">{comp.reviews_count}</span></span>
@@ -2140,37 +2125,33 @@ export default function ListingLiftAI() {
           </TabsContent>
 
           <TabsContent value="preview" className="space-y-6">
-            <Card className="bg-white/95 backdrop-blur-sm border-4 border-purple-400 shadow-2xl rounded-3xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-8">
+            <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#4A5568] shadow-2xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-[#4A5568] to-[#718096] text-white p-8">
                 <CardTitle className="text-3xl font-black flex items-center gap-3">
                   <TrendingUp className="w-8 h-8" />
                   Your Listing Preview 👀
                 </CardTitle>
-                <CardDescription className="text-purple-100 text-lg font-medium">
-                  See your transformation side-by-side!
+                <CardDescription className="text-white text-lg font-medium">
+                  See your transformation side-by-side. Copy and paste the optimized listing attributes into your Amazon listing to see your sales soar!
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-8">
                 {/* Keyword Gap Analysis Section */}
                 <div className="mb-8">
-                  <h3 className="text-xl font-black text-blue-700 mb-2 flex items-center gap-2">
-                    <BarChart3 className="w-6 h-6 text-blue-400" />
-                    Keyword Improvements: Before vs After
-                  </h3>
                   {previewKeywordGapLoading && <div className="text-blue-600 font-bold">Analyzing keyword improvements...</div>}
                   {previewKeywordGapError && <div className="text-red-600 font-bold">{previewKeywordGapError}</div>}
                   {previewKeywordGap && (
                     <div className="space-y-4">
                       {/* High Value Gaps */}
                       <div>
-                        <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
-                          <Badge className="bg-blue-600 text-white text-xs font-black border-2 border-blue-900">High Value Gaps (Now Included)</Badge>
-                          <span className="text-xs text-blue-900">(Added to your optimized title!)</span>
+                        <div className="font-black text-md mb-1 flex items-center gap-2">
+                          <span className="text-black font-black">High Value Gaps (Now Included)</span>
+                          <span className="text-xs text-gray-500">(Added to your optimized title!)</span>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {(previewKeywordGap.high_value_gaps || []).length > 0 ? (
                             previewKeywordGap.high_value_gaps.map((kw: string) => (
-                              <Badge key={kw} className="bg-blue-100 text-blue-800 border-blue-300 font-bold text-xs">{kw}</Badge>
+                              <Badge key={kw} className="bg-[#718096] text-white border-[#718096] font-bold text-xs">{kw}</Badge>
                             ))
                           ) : (
                             <span className="text-xs text-gray-500">No new high value keywords added.</span>
@@ -2179,14 +2160,14 @@ export default function ListingLiftAI() {
                       </div>
                       {/* Missing Keywords */}
                       <div>
-                        <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
-                          <Badge className="bg-cyan-600 text-white text-xs font-black border-2 border-cyan-900">Still Missing Keywords</Badge>
-                          <span className="text-xs text-cyan-900">(Not in your optimized title)</span>
+                        <div className="font-black text-md mb-1 flex items-center gap-2">
+                          <span className="text-black font-black">Still Missing Keywords</span>
+                          <span className="text-xs text-gray-500">(Not in your optimized title)</span>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {(previewKeywordGap.missing_keywords || []).length > 0 ? (
                             previewKeywordGap.missing_keywords.map((kw: any, i: number) => (
-                              <Badge key={kw.keyword + i} className="bg-cyan-100 text-cyan-800 border-cyan-300 font-bold text-xs">{kw.keyword}</Badge>
+                              <Badge key={kw.keyword + i} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw.keyword}</Badge>
                             ))
                           ) : (
                             <span className="text-xs text-gray-500">No missing keywords.</span>
@@ -2195,13 +2176,13 @@ export default function ListingLiftAI() {
                       </div>
                       {/* Our Existing Keywords */}
                       <div>
-                        <div className="font-black text-md text-blue-700 mb-1 flex items-center gap-2">
-                          <Badge className="bg-green-600 text-white text-xs font-black border-2 border-green-900">Optimized Title Keywords</Badge>
+                        <div className="font-black text-md mb-1 flex items-center gap-2">
+                          <span className="text-black font-black">Optimized Title Keywords</span>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {(previewKeywordGap.our_existing_keywords || []).length > 0 ? (
                             previewKeywordGap.our_existing_keywords.map((kw: string) => (
-                              <Badge key={kw} className="bg-green-100 text-green-800 border-green-300 font-bold text-xs">{kw}</Badge>
+                              <Badge key={kw} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw}</Badge>
                             ))
                           ) : (
                             <span className="text-xs text-gray-500">No keywords found in your optimized title.</span>
@@ -2215,7 +2196,7 @@ export default function ListingLiftAI() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Before (Original) */}
                   <div className="bg-gray-50 rounded-xl border p-6 flex flex-col gap-6">
-                    <h3 className="font-black text-lg mb-2 text-gray-700">Before (Original)</h3>
+                    <h3 className="font-black text-lg mb-2 text-gray-700">Original Listing 📝</h3>
                     {/* Title */}
                     <div>
                       <div className="text-xs font-bold text-gray-500 mb-1">Title</div>
@@ -2226,7 +2207,7 @@ export default function ListingLiftAI() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-blue-400 text-blue-700 font-bold rounded-xl"
+                          className="bg-[#718096] hover:bg-[#4A5568] text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200"
                           onClick={async () => {
                             await navigator.clipboard.writeText(originalListingData?.title || "")
                             setCopiedField('before-title')
@@ -2247,7 +2228,7 @@ export default function ListingLiftAI() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-green-400 text-green-700 font-bold rounded-xl"
+                              className="bg-[#718096] hover:bg-[#4A5568] text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200"
                               onClick={async () => {
                                 await navigator.clipboard.writeText(bp)
                                 setCopiedField('before-bullet-' + i)
@@ -2270,7 +2251,7 @@ export default function ListingLiftAI() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-purple-400 text-purple-700 font-bold rounded-xl"
+                          className="bg-[#718096] hover:bg-[#4A5568] text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200"
                           onClick={async () => {
                             await navigator.clipboard.writeText(originalListingData?.description || "")
                             setCopiedField('before-description')
@@ -2284,18 +2265,18 @@ export default function ListingLiftAI() {
                   </div>
                   {/* After (Optimized) */}
                   <div className="bg-gray-50 rounded-xl border p-6 flex flex-col gap-6">
-                    <h3 className="font-black text-lg mb-2 text-blue-700">After (Optimized)</h3>
+                    <h3 className="font-black text-lg mb-2 text-black-700">Optimized Listing 🚀</h3>
                     {/* Title */}
                     <div>
                       <div className="text-xs font-bold text-gray-500 mb-1">Title</div>
                       <div className="flex items-center gap-2">
-                        <span className="p-3 bg-white rounded border flex-1 font-semibold text-blue-700">
+                        <span className="p-3 bg-white rounded border flex-1 font-semibold text-black-700">
                           {titles[chosenTitleIdx ?? 0] || listingData.title || "No title chosen"}
                         </span>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-blue-400 text-blue-700 font-bold rounded-xl"
+                          className="bg-[#718096] hover:bg-[#4A5568] text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200"
                           onClick={async () => {
                             await navigator.clipboard.writeText(titles[chosenTitleIdx ?? 0] || listingData.title || "")
                             setCopiedField('after-title')
@@ -2317,7 +2298,7 @@ export default function ListingLiftAI() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="border-green-400 text-green-700 font-bold rounded-xl"
+                                  className="bg-[#718096] hover:bg-[#4A5568] text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200"
                                   onClick={async () => {
                                     await navigator.clipboard.writeText(listingData.bulletPoints[idx] || "")
                                     setCopiedField('after-bullet-' + idx)
@@ -2343,7 +2324,7 @@ export default function ListingLiftAI() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-purple-400 text-purple-700 font-bold rounded-xl"
+                          className="bg-[#718096] hover:bg-[#4A5568] text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200"
                           onClick={async () => {
                             await navigator.clipboard.writeText(
                               (chosenDescriptionIdx !== null && descriptionDrafts[chosenDescriptionIdx]) || ""
