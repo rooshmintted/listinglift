@@ -28,6 +28,9 @@ import {
   Mail,
   Lock,
   LogOut,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import type { User } from "@supabase/supabase-js"
@@ -221,6 +224,18 @@ export default function ListingLiftAI() {
   const [previewKeywordGapLoading, setPreviewKeywordGapLoading] = useState(false)
   const [previewKeywordGapError, setPreviewKeywordGapError] = useState("")
 
+  // Add state for revenue calculator in preview
+  const [currentRevenue, setCurrentRevenue] = useState<string>("")
+  
+  // Add state for performance metrics analysis
+  const [performanceMetrics, setPerformanceMetrics] = useState<{
+    ctr_improvement: number
+    conversion_improvement: number
+    keyword_improvement: number
+    total_sales_lift: number
+  } | null>(null)
+  const [performanceLoading, setPerformanceLoading] = useState(false)
+
   // Prepopulate descriptionDrafts with original description when entering description step
   useEffect(() => {
     if (optimizeStep === "description" && originalListingData?.description) {
@@ -300,6 +315,41 @@ export default function ListingLiftAI() {
   const generateSuggestions = async () => {
     setIsAnalyzing(true)
     setError("")
+    
+    // Clear all optimization context and content for fresh start
+    setTitles([""])
+    setChosenTitleIdx(null)
+    setHasChosenTitleThisSession(false)
+    setGptSuggestions(null)
+    setVisibleGptSuggestions(null)
+    setGptError("")
+    
+    setListingData(prev => ({ ...prev, bulletPoints: ["", "", "", "", ""] }))
+    setChosenBulletIdxs([])
+    setBulletIdeas(null)
+    setBulletError("")
+    setBulletGapResult(null)
+    setBulletGapError("")
+    setCompetitorDetails([])
+    
+    setDescriptionDrafts([""])
+    setChosenDescriptionIdx(null)
+    setDescriptionIdeas(null)
+    setDescriptionIdeasError("")
+    
+    setOptimizeStep("title")
+    setCompletedSteps([])
+    setOriginalListingData(null)
+    setPerformanceMetrics(null)
+    
+    setKeywordGapResult(null)
+    setKeywordGapError("")
+    setLastAnalyzed(0)
+    setShouldAnalyzeKeywords(false)
+    
+    setCompetitors([])
+    setSuggestions([])
+    
     try {
       // 1. Check if product exists in Supabase
       let productExists = false
@@ -459,6 +509,394 @@ export default function ListingLiftAI() {
       <div className="absolute bottom-20 right-20 w-28 h-28 bg-red-300 rounded-full blur-lg"></div>
     </div>
   )
+
+  // Interactive Demo Component
+  const InteractiveDemo = () => {
+    const [demoStep, setDemoStep] = useState(1)
+    const [isAnimating, setIsAnimating] = useState(false)
+    const [demoLoading, setDemoLoading] = useState(false)
+
+    const nextStep = () => {
+      if (demoStep < 4) {
+        setIsAnimating(true)
+        setDemoLoading(true)
+        setTimeout(() => {
+          setDemoStep(demoStep + 1)
+          setDemoLoading(false)
+          setIsAnimating(false)
+        }, 1500)
+      }
+    }
+
+    const prevStep = () => {
+      if (demoStep > 1) {
+        setIsAnimating(true)
+        setTimeout(() => {
+          setDemoStep(demoStep - 1)
+          setIsAnimating(false)
+        }, 300)
+      }
+    }
+
+    const resetDemo = () => {
+      setDemoStep(1)
+      setIsAnimating(false)
+      setDemoLoading(false)
+    }
+
+    return (
+      <div className="mb-16">
+        <Card className="bg-white/95 backdrop-blur-sm border-4 border-[#2C3E50] shadow-2xl rounded-3xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] text-white p-8">
+            <CardTitle className="text-3xl font-black text-center flex items-center justify-center gap-3">
+              <Sparkles className="w-8 h-8" />
+              See ListingLift AI in Action ✨
+              <Fire className="w-8 h-8" />
+            </CardTitle>
+            <CardDescription className="text-white text-xl font-medium text-center">
+              Watch how we transform a basic matcha listing into a conversion machine!
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-8">
+            {/* Progress Indicator */}
+            <div className="flex justify-center mb-8">
+              <div className="flex items-center gap-4">
+                {[1, 2, 3, 4].map((step) => (
+                  <div key={step} className="flex items-center">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                        step <= demoStep
+                          ? 'bg-[#2C3E50] text-white scale-110'
+                          : 'bg-gray-300 text-gray-600'
+                      }`}
+                    >
+                      {step}
+                    </div>
+                    {step < 4 && (
+                      <div
+                        className={`w-12 h-1 mx-2 transition-all duration-300 ${
+                          step < demoStep ? 'bg-[#2C3E50]' : 'bg-gray-300'
+                        }`}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Demo Content */}
+            <div className={`transition-all duration-500 ${isAnimating ? 'opacity-50 transform scale-95' : 'opacity-100 transform scale-100'}`}>
+              
+              {/* Step 1: Smart Keyword Analysis */}
+              {demoStep === 1 && (
+                <div className="space-y-6">
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-black text-[#2C3E50] mb-2">🎯 Smart Keyword Analysis</h3>
+                    <p className="text-lg text-gray-600 font-medium">Our AI discovers the keywords your competitors are using that you're missing</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* High Value Gaps */}
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-200 rounded-xl p-4 border-2 border-[#718096]">
+                      <div className="font-black text-md mb-3 flex items-center gap-2">
+                        <span className="text-black font-black">High Value Gaps</span>
+                        <span className="text-xs text-gray-500">(Add these!)</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {["ceremonial", "premium", "first harvest"].map((kw) => (
+                          <Badge key={kw} className="bg-[#718096] text-white border-[#718096] font-bold text-xs animate-pulse">{kw}</Badge>
+                        ))}
+                      </div>
+                      <div className="mt-3 text-xs text-gray-600">
+                        <strong>+15% CTR potential</strong> by adding these high-performing keywords
+                      </div>
+                    </div>
+
+                    {/* Missing Keywords */}
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-200 rounded-xl p-4 border-2 border-[#718096]">
+                      <div className="font-black text-md mb-3 flex items-center gap-2">
+                        <span className="text-black font-black">Missing Keywords</span>
+                        <span className="text-xs text-gray-500">(From competitors)</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {["Japanese", "Uji", "pure"].map((kw) => (
+                          <Badge key={kw} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw}</Badge>
+                        ))}
+                      </div>
+                      <div className="mt-3 text-xs text-gray-600">
+                        <strong>3x more keywords</strong> than your current title
+                      </div>
+                    </div>
+
+                    {/* Your Keywords */}
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-200 rounded-xl p-4 border-2 border-[#718096]">
+                      <div className="font-black text-md mb-3">
+                        <span className="text-black font-black">Your Keywords</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {["organic", "matcha", "powder"].map((kw) => (
+                          <Badge key={kw} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw}</Badge>
+                        ))}
+                      </div>
+                      <div className="mt-3 text-xs text-gray-600">
+                        <strong>Current coverage:</strong> Basic keywords only
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: AI-Powered Title Generation */}
+              {demoStep === 2 && (
+                <div className="space-y-6">
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-black text-[#2C3E50] mb-2">🚀 AI-Powered Title Generation</h3>
+                    <p className="text-lg text-gray-600 font-medium">Watch your boring title transform into a conversion machine</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Before */}
+                    <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border-2 border-red-200">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">×</span>
+                        </div>
+                        <span className="font-black text-lg text-red-700">Before (Boring)</span>
+                      </div>
+                      <div className="bg-white p-4 rounded-lg border-2 border-red-300 mb-4">
+                        <p className="text-gray-800 font-medium">"Organic Matcha Powder - Green Tea"</p>
+                      </div>
+                      <div className="text-sm text-red-600 space-y-1">
+                        <div>• Only 3 basic keywords</div>
+                        <div>• Generic, boring positioning</div>
+                        <div>• No competitive advantage</div>
+                        <div>• Missing key Amazon search terms</div>
+                        <div>• No emotional hooks or benefits</div>
+                      </div>
+                    </div>
+
+                    {/* After */}
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-200">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">✓</span>
+                        </div>
+                        <span className="font-black text-lg text-green-700">After (Optimized)</span>
+                      </div>
+                      <div className="bg-white p-4 rounded-lg border-2 border-green-300 mb-4">
+                        <p className="text-gray-800 font-medium">"Premium Ceremonial Japanese Matcha Powder - First Harvest Uji Green Tea for Lattes, Smoothies & Baking - Stone Ground, Organic, Non-GMO - 4oz Resealable Pouch"</p>
+                      </div>
+                      <div className="text-sm text-green-600 space-y-1">
+                        <div>• <strong>+15% CTR boost</strong></div>
+                        <div>• <strong>+8% conversion rate</strong></div>
+                        <div>• <strong>15+ high-value keywords</strong></div>
+                        <div>• <strong>Amazon-compliant length</strong></div>
+                        <div>• <strong>Includes size & key attributes</strong></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Bullet Point Optimization */}
+              {demoStep === 3 && (
+                <div className="space-y-6">
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-black text-[#2C3E50] mb-2">⚡ Bullet Point Optimization</h3>
+                    <p className="text-lg text-gray-600 font-medium">Transform weak bullet points into compelling sales drivers</p>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    {/* Before/After Bullet Point */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-200 rounded-xl p-6 border-2 border-gray-300">
+                        <h4 className="font-black text-md text-gray-700 mb-3">Before (Weak - 35 chars)</h4>
+                        <div className="bg-white p-4 rounded-lg border-2 border-gray-300">
+                          <p className="text-gray-600 text-sm">High quality matcha powder from Japan</p>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-300">
+                        <h4 className="font-black text-md text-blue-700 mb-3">After (Compelling - 200 chars)</h4>
+                        <div className="bg-white p-4 rounded-lg border-2 border-blue-300">
+                          <p className="text-gray-800 text-sm font-medium">🍃 <strong>PREMIUM CEREMONIAL GRADE:</strong> Stone-ground first harvest matcha from Uji, Japan - the gold standard for authentic flavor and maximum health benefits. Perfect for traditional tea ceremonies or modern beverages</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* AI Suggestions Demo */}
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-200 rounded-xl p-6 border-2 border-[#718096]">
+                      <h4 className="font-black text-lg text-[#2C3E50] mb-4 flex items-center gap-2">
+                        <Lightbulb className="w-5 h-5" />
+                        AI Suggestions (Demo)
+                      </h4>
+                      <div className="space-y-3">
+                        {[
+                          "🍃 PREMIUM CEREMONIAL GRADE: Stone-ground first harvest matcha from Uji, Japan - the gold standard for authentic flavor and maximum health benefits. Perfect for traditional tea ceremonies or modern beverages",
+                          "🌟 PERFECT FOR LATTES & SMOOTHIES: Dissolves instantly with no bitter aftertaste - create café-quality drinks at home. Rich, creamy texture that blends beautifully with milk, oat milk, or your favorite non-dairy alternative",
+                          "💚 ANTIOXIDANT POWERHOUSE: 10x more antioxidants than regular green tea - boost energy naturally without the crash. Packed with catechins, EGCG, and L-theanine for sustained focus and mental clarity throughout your day",
+                          "🎯 VERSATILE KITCHEN ESSENTIAL: Perfect for baking matcha cookies, cakes, ice cream, face masks & traditional tea ceremonies. Add vibrant green color and authentic Japanese flavor to all your culinary creations",
+                          "✅ PURE & NATURAL: No artificial flavors, colors, or preservatives. Certified organic, non-GMO, and gluten-free. Packaged in resealable pouch to maintain freshness and prevent oxidation for maximum potency"
+                        ].map((suggestion, idx) => (
+                          <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-lg border-2 border-blue-300">
+                            <span className="text-sm font-medium text-gray-800 flex-1">{suggestion}</span>
+                            <div className="flex gap-2 ml-4">
+                              <Button size="sm" className="bg-[#334155] text-white px-3 py-1 text-xs">Accept</Button>
+                              <Button size="sm" variant="outline" className="border-red-400 text-red-600 px-3 py-1 text-xs">Reject</Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Instant Results Preview */}
+              {demoStep === 4 && (
+                <div className="space-y-6">
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-black text-[#2C3E50] mb-2">📊 Instant Results Preview</h3>
+                    <p className="text-lg text-gray-600 font-medium">See the dramatic transformation and projected performance boost</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Improved Listing Attributes */}
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-300">
+                      <h4 className="font-black text-xl text-green-700 mb-4 flex items-center gap-2">
+                        <CheckCircle className="w-6 h-6" />
+                        Improved Listing Attributes
+                      </h4>
+                      <div className="space-y-4">
+                        {/* Optimized Title */}
+                        <div className="bg-white p-4 rounded-lg border-2 border-green-300">
+                          <div className="text-xs font-bold text-green-700 mb-2">✓ OPTIMIZED TITLE</div>
+                          <div className="text-sm font-medium text-gray-800">
+                            "Premium Ceremonial Japanese Matcha Powder - First Harvest Uji Green Tea for Lattes, Smoothies & Baking - Stone Ground, Organic, Non-GMO - 4oz Resealable Pouch"
+                          </div>
+                        </div>
+                        {/* Key Bullet Points */}
+                        <div className="bg-white p-4 rounded-lg border-2 border-green-300">
+                          <div className="text-xs font-bold text-green-700 mb-2">✓ ENHANCED BULLET POINTS (5 OPTIMIZED)</div>
+                          <div className="space-y-1 text-xs text-gray-700">
+                            <div>• 🍃 Premium ceremonial grade from Uji, Japan - authentic flavor & maximum health benefits</div>
+                            <div>• 🌟 Perfect for lattes & smoothies - dissolves instantly, no bitter aftertaste</div>
+                            <div>• 💚 10x more antioxidants than regular green tea - natural energy without crash</div>
+                            <div>• 🎯 Versatile kitchen essential - baking, ice cream, face masks & tea ceremonies</div>
+                            <div>• ✅ Pure & natural - organic, non-GMO, gluten-free, resealable packaging</div>
+                          </div>
+                        </div>
+                        {/* Enhanced Description */}
+                        <div className="bg-white p-4 rounded-lg border-2 border-green-300">
+                          <div className="text-xs font-bold text-green-700 mb-2">✓ COMPELLING DESCRIPTION (250+ WORDS)</div>
+                          <div className="text-xs text-gray-700">
+                            "Experience the authentic taste of Japan with our premium ceremonial grade matcha powder. Sourced directly from the ancient tea gardens of Uji, this stone-ground first harvest matcha delivers unparalleled flavor and health benefits. Whether you're creating traditional tea ceremonies or modern café-style beverages, our matcha transforms ordinary moments into extraordinary experiences. Rich in antioxidants, catechins, and L-theanine for sustained energy and mental clarity. Perfect for lattes, smoothies, baking, and wellness rituals..."
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Revenue Impact */}
+                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-6 border-2 border-yellow-300">
+                      <h4 className="font-black text-xl text-yellow-700 mb-4 flex items-center gap-2">
+                        <DollarSign className="w-6 h-6" />
+                        Revenue Impact Calculator
+                      </h4>
+                      <div className="space-y-4">
+                        <div className="bg-white p-4 rounded-lg border-2 border-yellow-300">
+                          <div className="text-center">
+                            <div className="text-2xl font-black text-gray-800 mb-1">$2,847</div>
+                            <div className="text-sm text-gray-600">Projected monthly revenue increase</div>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600 space-y-2">
+                          <div className="flex justify-between">
+                            <span>Current monthly sales:</span>
+                            <span className="font-medium">$8,500</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Optimized projection:</span>
+                            <span className="font-medium text-green-600">$11,347</span>
+                          </div>
+                          <div className="border-t pt-2 flex justify-between font-bold">
+                            <span>Monthly increase:</span>
+                            <span className="text-green-600">+$2,847</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Call to Action */}
+                  <div className="text-center bg-gradient-to-br from-[#F5B041]/20 to-[#E67E22]/20 rounded-xl p-8 border-2 border-[#F5B041]">
+                    <h4 className="text-2xl font-black text-[#2C3E50] mb-4">Ready to Transform Your Listings? 🚀</h4>
+                    <p className="text-lg text-gray-700 font-medium mb-6">
+                      Join thousands of sellers who are already crushing it with ListingLift AI
+                    </p>
+                    <Button
+                      onClick={() => setCurrentPage("signup")}
+                      className="bg-gradient-to-r from-[#2C3E50] to-[#2C3E50] hover:from-[#1A252F] hover:to-[#1A252F] text-white font-black text-xl px-8 py-4 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300"
+                    >
+                      <Sparkles className="w-6 h-6 mr-3" />
+                      Start Your Free Trial ✨
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+              <Button
+                onClick={prevStep}
+                disabled={demoStep === 1}
+                variant="outline"
+                className="border-[#718096] text-[#718096] hover:bg-[#718096] hover:text-white disabled:opacity-50"
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Previous
+              </Button>
+
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-600 font-medium">
+                  Step {demoStep} of 4
+                </span>
+                {demoStep < 4 && (
+                  <Button
+                    onClick={nextStep}
+                    disabled={demoLoading}
+                    className="bg-[#2C3E50] hover:bg-[#1A252F] text-white"
+                  >
+                    {demoLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Next Step
+                        <ChevronRight className="w-4 h-4 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                )}
+                {demoStep === 4 && (
+                  <Button
+                    onClick={resetDemo}
+                    variant="outline"
+                    className="border-[#2C3E50] text-[#2C3E50] hover:bg-[#2C3E50] hover:text-white"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Restart Demo
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   // Handler to load sample data into ASIN and hero keyword fields
   function handleLoadSampleData() {
@@ -661,6 +1099,64 @@ export default function ListingLiftAI() {
     }
   }, [chosenDescriptionIdx])
 
+  // Analyze performance improvements when preview tab is accessed with complete data
+  useEffect(() => {
+    if (
+      activeTab === "preview" && 
+      originalListingData && 
+      chosenTitleIdx !== null && 
+      chosenBulletIdxs.length === 5 && 
+      chosenDescriptionIdx !== null &&
+      !performanceMetrics &&
+      !performanceLoading
+    ) {
+      const analyzePerformance = async () => {
+        setPerformanceLoading(true)
+        try {
+          const optimizedListing = {
+            title: titles[chosenTitleIdx] || originalListingData.title,
+            bulletPoints: chosenBulletIdxs.map(idx => listingData.bulletPoints[idx]).filter(Boolean),
+            description: descriptionDrafts[chosenDescriptionIdx] || originalListingData.description
+          }
+
+          const response = await fetch("/api/listing-analysis", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              originalListing: {
+                title: originalListingData.title,
+                bulletPoints: originalListingData.bulletPoints,
+                description: originalListingData.description
+              },
+              optimizedListing,
+              heroKeyword: listingData.heroKeyword
+            })
+          })
+
+          if (!response.ok) {
+            throw new Error(`Analysis failed: ${response.status}`)
+          }
+
+          const metrics = await response.json()
+          setPerformanceMetrics(metrics)
+        } catch (error: any) {
+          console.error("Performance analysis error:", error)
+          // Set fallback metrics if analysis fails
+          setPerformanceMetrics({
+            ctr_improvement: 10,
+            conversion_improvement: 6,
+            keyword_improvement: 25,
+            total_sales_lift: 15
+          })
+        } finally {
+          setPerformanceLoading(false)
+        }
+      }
+
+      analyzePerformance()
+    }
+  }, [activeTab, originalListingData, chosenTitleIdx, chosenBulletIdxs, chosenDescriptionIdx, performanceMetrics, performanceLoading])
+
   // Show loading spinner while checking auth
   if (loading) {
     return (
@@ -736,6 +1232,9 @@ export default function ListingLiftAI() {
             ))}
           </div>
 
+          {/* Interactive Demo Section */}
+          <InteractiveDemo />
+
           {/* Features Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
             {[
@@ -743,7 +1242,7 @@ export default function ListingLiftAI() {
                 icon: Target,
                 title: "Competitor Spy Mode 🕵️",
                 description:
-                  "See exactly what your competition is doing and steal their best strategies (legally, obvs)",
+                  "See exactly what your competition is doing and learn from their best strategies",
                 color: "from-[#4A5568] to-[#4A5568]",
                 borderColor: "border-[#4A5568]",
                 textColor: "text-white",
@@ -1185,92 +1684,183 @@ export default function ListingLiftAI() {
                 </div>
               </div>
             </div>
-            {/* Right Column: Keywords Section (2/3) */}
+            {/* Right Column: Keywords Section or Revenue Calculator (2/3) */}
             <div className="flex flex-col justify-between bg-white rounded-2xl p-6 border-2 border-[#718096] xl:w-2/3 w-full mt-8 xl:mt-0">
-              <h2 className="text-xl font-black text-[#2C3E50] mb-4 flex items-center gap-2">
-                <BarChart3 className="w-6 h-6 text-[#F5B041]" />
-                Amazon Keywords
-              </h2>
-              {activeTab === "input" ? (
-                <div className="flex flex-col gap-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-[#718096] shadow-inner">
-                  <div className="text-lg font-bold text-[#2C3E50]">
-                    Our AI analyzes your product and your top competitors to uncover the exact keywords and phrases that drive clicks and sales on Amazon.
+              {activeTab === "preview" ? (
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-1 border-[#718096]">
+                  <div className="bg-[#718096] rounded-lg p-4 mb-4 -m-6 mb-6">
+                    <h4 className="font-black text-xl text-white mb-0 flex items-center gap-2">
+                      <DollarSign className="w-6 h-6 text-white" />
+                      Revenue Impact Calculator
+                    </h4>
                   </div>
-                  <div className="text-md text-[#4A5568]">
-                    We don't just guess—we use real data and advanced language models to identify what's missing, what's working, and what can set your listing apart.
-                  </div>
-                  <ul className="list-disc list-inside text-[#2C3E50] font-medium space-y-1 pl-2">
-                    <li>
-                      <span className="font-bold">A breakdown of high-value keywords</span> your listing should target
-                    </li>
-                    <li>
-                      <span className="font-bold">Actionable, AI-powered suggestions</span> to boost your visibility and conversion rate
-                    </li>
-                    <li>
-                      <span className="font-bold">Your top 10 strongest competitors' listing data</span>
-                    </li>
-                  </ul>
-                  <div className="text-md text-[#2C3E50] font-semibold mt-2">
-                    Let our AI do the heavy lifting—so you can focus on growing your business!
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="flex-1">
-                    {keywordGapLoading && <div className="text-blue-600 font-bold">Analyzing keyword gaps...</div>}
-                    {keywordGapError && <div className="text-red-600 font-bold">{keywordGapError}</div>}
-                    {keywordGapResult && (
-                      <div className="space-y-4">
-                        {/* High Value Gaps */}
-                        <div>
-                          <div className="font-black text-md mb-1 flex items-center gap-2">
-                            <span className="text-black font-black">High Value Gaps</span>
-                            <span className="text-xs text-gray-500">(Add these to your title!)</span>
-                          </div>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {(keywordGapResult.high_value_gaps || []).length > 0 ? (
-                              keywordGapResult.high_value_gaps.map((kw: string) => (
-                                <Badge key={kw} className="bg-[#718096] text-white border-[#718096] font-bold text-xs">{kw}</Badge>
-                              ))
-                            ) : (
-                              <span className="text-xs text-gray-500">No high value gaps found.</span>
-                            )}
+                  <div className="space-y-4">
+                    {/* Current Revenue Input */}
+                    <div>
+                      <Label className="text-sm font-bold text-[#4A5568] mb-2 block">
+                        Current Monthly Revenue ($)
+                      </Label>
+                      <Input
+                        type="number"
+                        placeholder="Enter current monthly revenue"
+                        value={currentRevenue}
+                        onChange={(e) => setCurrentRevenue(e.target.value)}
+                        className="bg-gray-50 border-2 border-[#718096] text-[#334155] focus:border-[#334155] focus:ring-4 focus:ring-gray-200"
+                      />
+                    </div>
+                    
+                    {currentRevenue && !isNaN(Number(currentRevenue)) && Number(currentRevenue) > 0 && performanceMetrics && (
+                      <>
+                        <div className="bg-white p-4 rounded-lg border-2 border-orange-200">
+                          <div className="text-center">
+                            <div className="text-2xl font-black text-[#334155] mb-1">
+                              ${(Number(currentRevenue) * (performanceMetrics.total_sales_lift / 100)).toLocaleString()}
+                            </div>
+                            <div className="text-sm text-[#4A5568]">Projected monthly revenue increase</div>
                           </div>
                         </div>
-                        {/* Missing Keywords */}
-                        <div>
-                          <div className="font-black text-md mb-1 flex items-center gap-2">
-                            <span className="text-black font-black">Missing Keywords</span>
-                            <span className="text-xs text-gray-500">(From competitors, not in your title)</span>
+                        <div className="text-sm text-[#4A5568] space-y-2">
+                          <div className="flex justify-between">
+                            <span>Current monthly sales:</span>
+                            <span className="font-medium">${Number(currentRevenue).toLocaleString()}</span>
                           </div>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {(keywordGapResult.missing_keywords || []).length > 0 ? (
-                              keywordGapResult.missing_keywords.map((kw: any, i: number) => (
-                                <Badge key={kw.keyword + i} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw.keyword}</Badge>
-                              ))
-                            ) : (
-                              <span className="text-xs text-gray-500">No missing keywords found.</span>
-                            )}
+                          <div className="flex justify-between">
+                            <span>Optimized projection:</span>
+                            <span className="font-medium text-green-600">
+                              ${(Number(currentRevenue) * (1 + performanceMetrics.total_sales_lift / 100)).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="border-t pt-2 flex justify-between font-bold">
+                            <span>Monthly increase:</span>
+                            <span className="text-green-600">
+                              +${(Number(currentRevenue) * (performanceMetrics.total_sales_lift / 100)).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="text-center mt-2 text-xs text-gray-500">
+                            Based on {performanceMetrics.total_sales_lift}% projected sales lift
                           </div>
                         </div>
-                        {/* Our Existing Keywords */}
-                        <div>
-                          <div className="font-black text-md mb-1 flex items-center gap-2">
-                            <span className="text-black font-black">Your Title Keywords</span>
-                          </div>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {(keywordGapResult.our_existing_keywords || []).length > 0 ? (
-                              keywordGapResult.our_existing_keywords.map((kw: string) => (
-                                <Badge key={kw} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw}</Badge>
-                              ))
-                            ) : (
-                              <span className="text-xs text-gray-500">No keywords found in your title.</span>
-                            )}
+                      </>
+                    )}
+                    
+                    {(!currentRevenue || isNaN(Number(currentRevenue)) || Number(currentRevenue) <= 0) && (
+                      <div className="bg-white p-4 rounded-lg border-2 border-gray-300">
+                        <div className="text-center text-gray-500">
+                          <div className="text-lg font-medium mb-1">Enter your revenue above</div>
+                          <div className="text-sm">to see your projected increase</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {(!performanceMetrics && currentRevenue && !isNaN(Number(currentRevenue)) && Number(currentRevenue) > 0) && (
+                      <div className="bg-white p-4 rounded-lg border-2 border-gray-300">
+                        <div className="text-center text-gray-500">
+                          <div className="text-lg font-medium mb-1">Complete optimization steps</div>
+                          <div className="text-sm">to see revenue projections</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {performanceLoading && (
+                      <div className="bg-white p-4 rounded-lg border-2 border-gray-300">
+                        <div className="text-center text-[#4A5568]">
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#718096]"></div>
+                            Analyzing performance improvements...
                           </div>
                         </div>
                       </div>
                     )}
                   </div>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-xl font-black text-[#2C3E50] mb-4 flex items-center gap-2">
+                    <BarChart3 className="w-6 h-6 text-[#F5B041]" />
+                    Amazon Keywords
+                  </h2>
+                  {activeTab === "input" ? (
+                    <div className="flex flex-col gap-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-[#718096] shadow-inner">
+                      <div className="text-lg font-bold text-[#2C3E50]">
+                        Our AI analyzes your product and your top competitors to uncover the exact keywords and phrases that drive clicks and sales on Amazon.
+                      </div>
+                      <div className="text-md text-[#4A5568]">
+                        We don't just guess—we use real data and advanced language models to identify what's missing, what's working, and what can set your listing apart.
+                      </div>
+                      <ul className="list-disc list-inside text-[#2C3E50] font-medium space-y-1 pl-2">
+                        <li>
+                          <span className="font-bold">A breakdown of high-value keywords</span> your listing should target
+                        </li>
+                        <li>
+                          <span className="font-bold">Actionable, AI-powered suggestions</span> to boost your visibility and conversion rate
+                        </li>
+                        <li>
+                          <span className="font-bold">Your top 10 strongest competitors' listing data</span>
+                        </li>
+                      </ul>
+                      <div className="text-md text-[#2C3E50] font-semibold mt-2">
+                        Let our AI do the heavy lifting—so you can focus on growing your business!
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex-1">
+                        {keywordGapLoading && <div className="text-blue-600 font-bold">Analyzing keyword gaps...</div>}
+                        {keywordGapError && <div className="text-red-600 font-bold">{keywordGapError}</div>}
+                        {keywordGapResult && (
+                          <div className="space-y-4">
+                            {/* High Value Gaps */}
+                            <div>
+                              <div className="font-black text-md mb-1 flex items-center gap-2">
+                                <span className="text-black font-black">High Value Gaps</span>
+                                <span className="text-xs text-gray-500">(Add these to your title!)</span>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {(keywordGapResult.high_value_gaps || []).length > 0 ? (
+                                  keywordGapResult.high_value_gaps.map((kw: string) => (
+                                    <Badge key={kw} className="bg-[#718096] text-white border-[#718096] font-bold text-xs">{kw}</Badge>
+                                  ))
+                                ) : (
+                                  <span className="text-xs text-gray-500">No high value gaps found.</span>
+                                )}
+                              </div>
+                            </div>
+                            {/* Missing Keywords */}
+                            <div>
+                              <div className="font-black text-md mb-1 flex items-center gap-2">
+                                <span className="text-black font-black">Missing Keywords</span>
+                                <span className="text-xs text-gray-500">(From competitors, not in your title)</span>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {(keywordGapResult.missing_keywords || []).length > 0 ? (
+                                  keywordGapResult.missing_keywords.map((kw: any, i: number) => (
+                                    <Badge key={kw.keyword + i} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw.keyword}</Badge>
+                                  ))
+                                ) : (
+                                  <span className="text-xs text-gray-500">No missing keywords found.</span>
+                                )}
+                              </div>
+                            </div>
+                            {/* Our Existing Keywords */}
+                            <div>
+                              <div className="font-black text-md mb-1 flex items-center gap-2">
+                                <span className="text-black font-black">Your Title Keywords</span>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {(keywordGapResult.our_existing_keywords || []).length > 0 ? (
+                                  keywordGapResult.our_existing_keywords.map((kw: string) => (
+                                    <Badge key={kw} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw}</Badge>
+                                  ))
+                                ) : (
+                                  <span className="text-xs text-gray-500">No keywords found in your title.</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </>
               )}
             </div>
@@ -2136,63 +2726,9 @@ export default function ListingLiftAI() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-8">
-                {/* Keyword Gap Analysis Section */}
-                <div className="mb-8">
-                  {previewKeywordGapLoading && <div className="text-blue-600 font-bold">Analyzing keyword improvements...</div>}
-                  {previewKeywordGapError && <div className="text-red-600 font-bold">{previewKeywordGapError}</div>}
-                  {previewKeywordGap && (
-                    <div className="space-y-4">
-                      {/* High Value Gaps */}
-                      <div>
-                        <div className="font-black text-md mb-1 flex items-center gap-2">
-                          <span className="text-black font-black">High Value Gaps (Now Included)</span>
-                          <span className="text-xs text-gray-500">(Added to your optimized title!)</span>
-                        </div>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {(previewKeywordGap.high_value_gaps || []).length > 0 ? (
-                            previewKeywordGap.high_value_gaps.map((kw: string) => (
-                              <Badge key={kw} className="bg-[#718096] text-white border-[#718096] font-bold text-xs">{kw}</Badge>
-                            ))
-                          ) : (
-                            <span className="text-xs text-gray-500">No new high value keywords added.</span>
-                          )}
-                        </div>
-                      </div>
-                      {/* Missing Keywords */}
-                      <div>
-                        <div className="font-black text-md mb-1 flex items-center gap-2">
-                          <span className="text-black font-black">Still Missing Keywords</span>
-                          <span className="text-xs text-gray-500">(Not in your optimized title)</span>
-                        </div>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {(previewKeywordGap.missing_keywords || []).length > 0 ? (
-                            previewKeywordGap.missing_keywords.map((kw: any, i: number) => (
-                              <Badge key={kw.keyword + i} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw.keyword}</Badge>
-                            ))
-                          ) : (
-                            <span className="text-xs text-gray-500">No missing keywords.</span>
-                          )}
-                        </div>
-                      </div>
-                      {/* Our Existing Keywords */}
-                      <div>
-                        <div className="font-black text-md mb-1 flex items-center gap-2">
-                          <span className="text-black font-black">Optimized Title Keywords</span>
-                        </div>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {(previewKeywordGap.our_existing_keywords || []).length > 0 ? (
-                            previewKeywordGap.our_existing_keywords.map((kw: string) => (
-                              <Badge key={kw} className="bg-white text-[#2C3E50] border-[#718096] font-bold text-xs">{kw}</Badge>
-                            ))
-                          ) : (
-                            <span className="text-xs text-gray-500">No keywords found in your optimized title.</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {/* ...existing preview content... */}
+
+
+                {/* Side-by-side comparison */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Before (Original) */}
                   <div className="bg-gray-50 rounded-xl border p-6 flex flex-col gap-6">

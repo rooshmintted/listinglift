@@ -56,7 +56,7 @@ Each should maximize use of the most frequent words/phrases from competitors.
 
 Do NOT invent or insert unrelated words (like "Gourmet", "Deluxe", "Feast", or "Selection") unless those words are frequent across competitors.
 
-Favor high-frequency phrases as close to the front of title as possible (within Amazon’s 200 character limit).
+Favor high-frequency phrases as close to the front of title as possible (come close to Amazon’s 200 character limit but do not exceed it).
 
 Maintain compliance with Amazon style guidelines (avoid excess symbols, capitalization, or unnatural structures).
 
