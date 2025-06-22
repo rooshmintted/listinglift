@@ -1175,7 +1175,7 @@ export default function ListingLiftAI() {
           {/* Hero Section */}
           <div className="text-center mb-16">
             <div className="inline-block p-8 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border-4 border-[#2C3E50] transform hover:rotate-1 transition-transform duration-300 mb-8">
-              <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#2C3E50] via-[#4A5568] to-[#718096] mb-6 tracking-tight">
+              <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#2C3E50] via-[#4A5568] to-[#718096] mb-6 tracking-tight leading-tight py-2">
                 ListingLift<span className="text-[#F5B041]">.ai</span>
               </h1>
               <div className="flex items-center justify-center gap-3 mb-6">
